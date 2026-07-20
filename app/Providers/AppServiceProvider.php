@@ -31,6 +31,7 @@ use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\WarehousePolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
 
@@ -63,6 +64,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($vercelUrl = env('VERCEL_URL')) {
+            $root = 'https://'.$vercelUrl;
+            config(['app.url' => $root]);
+            URL::forceRootUrl($root);
+            URL::forceScheme('https');
+        }
+
         foreach ($this->policies as $model => $policy) {
             Gate::policy($model, $policy);
         }
