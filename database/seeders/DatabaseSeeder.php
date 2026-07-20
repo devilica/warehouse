@@ -36,5 +36,7 @@ class DatabaseSeeder extends Seeder
         Warehouse::factory(2)->create();
         $category = ProductCategory::create(['name' => 'General', 'slug' => 'general']);
         Product::factory(10)->create(['category_id' => $category->id]);
+
+        $this->call(DemoDataSeeder::class);
     }
 }

@@ -18,6 +18,7 @@ class UserController extends ApiController
     {
         $this->authorize('viewAny', User::class);
         $items = QueryBuilder::for(User::class)
+            ->with('roles')
             ->allowedFilters([AllowedFilter::partial('name'), AllowedFilter::partial('email')])
             ->allowedIncludes([AllowedInclude::relationship('roles')])
             ->allowedSorts(['created_at', 'id'])

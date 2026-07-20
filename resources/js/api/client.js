@@ -43,10 +43,17 @@ export function unwrapPaginated(response) {
 }
 
 export function getErrorMessage(error) {
-    return error.response?.data?.message
-        ?? error.response?.data?.errors
-        ?? error.message
-        ?? 'Something went wrong';
+    const data = error.response?.data;
+    if (data?.message && data.message !== 'The given data was invalid.') {
+        return data.message;
+    }
+    if (data?.errors) {
+        const first = Object.values(data.errors).flat()[0];
+        if (first) {
+            return first;
+        }
+    }
+    return data?.message ?? error.message ?? 'Something went wrong';
 }
 
 export default api;

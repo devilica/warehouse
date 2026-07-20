@@ -1,59 +1,140 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Warehouse Management System (WMS)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Full-stack warehouse management application for inventory, procurement, and staff operations — built as a portfolio project.
 
-## About Laravel
+**Laravel 12** · **Vue 3** · **PHP 8.2+**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## About
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Warehouse CMS is a single-page admin application backed by a REST API. It covers day-to-day warehouse workflows: tracking stock across locations, managing purchase orders and goods receipts, running inventory counts and adjustments, and controlling access with role-based permissions.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Features
 
-## Learning Laravel
+- **Dashboard** — KPI cards (stock value, low stock, pending POs) and procurement trends chart
+- **Catalog** — Products, categories, suppliers, barcode support
+- **Warehouses** — Multi-warehouse setup with zones, shelves, and locations
+- **Inventory** — Stock levels, transactions, adjustments, transfers, cycle counts
+- **Procurement** — Purchase orders and goods receipts
+- **People** — Users, employees, roles and permissions (Spatie)
+- **System** — PDF/Excel reports, audit log, notifications
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer | Stack |
+|-------|-------|
+| Backend | Laravel 12, Sanctum, Spatie Permission & Query Builder, Activity Log |
+| Frontend | Vue 3, Vue Router, Pinia, Tailwind CSS 4, Vite, ApexCharts |
+| Database | MySQL (production) or SQLite (local default) |
 
-## Laravel Sponsors
+## Requirements
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- PHP **8.2+** with extensions: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`
+- Composer 2.x
+- Node.js **18+** and npm
+- MySQL 8+ (optional — SQLite works out of the box for a quick start)
 
-### Premium Partners
+## Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 1. Clone the repository
 
-## Contributing
+```bash
+git clone https://github.com/devilica/warehouse.git
+cd warehouse
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Install PHP dependencies and configure environment
 
-## Code of Conduct
+```bash
+composer install
+cp .env.example .env          # Windows: copy .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Set up the database
 
-## Security Vulnerabilities
+**SQLite (easiest for local development)**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Ensure `.env` contains:
+
+```
+DB_CONNECTION=sqlite
+```
+
+Then create the database file and run migrations with seed data:
+
+```bash
+touch database/database.sqlite   # Windows: type nul > database\database.sqlite
+php artisan migrate --seed
+```
+
+**MySQL**
+
+Update the `DB_*` variables in `.env`, create the database, then run:
+
+```bash
+php artisan migrate --seed
+```
+
+### 4. Install frontend dependencies and run
+
+**Option A — two terminals**
+
+```bash
+npm install
+npm run dev          # terminal 1
+php artisan serve    # terminal 2
+```
+
+**Option B — all-in-one dev script**
+
+```bash
+npm install
+composer dev
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+### Quick setup (alternative)
+
+If you prefer a single command after cloning:
+
+```bash
+composer setup
+php artisan db:seed
+npm run dev
+```
+
+## Default Login
+
+After seeding, use these accounts:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Super Admin | `admin@wms.test` | `password` |
+| Warehouse Manager | `manager@wms.test` | `password` |
+
+`php artisan migrate --seed` loads roles, sample catalog/warehouse data, and demo inventory and purchase order records via `DemoDataSeeder`.
+
+## Useful Commands
+
+| Command | Description |
+|---------|-------------|
+| `composer dev` | Run Laravel server, queue worker, logs, and Vite together |
+| `php artisan test` | Run the test suite |
+| `npm run build` | Build frontend assets for production |
+| `php artisan db:seed --class=DemoDataSeeder` | Re-seed demo data (skips if purchase orders already exist) |
+
+## Deployment (Vercel)
+
+This project includes a [`vercel.json`](vercel.json) configuration for serverless deployment. Set at minimum:
+
+- `APP_KEY` (copy from local `.env`)
+- `APP_URL` (your Vercel domain)
+- `DB_*` connection variables for MySQL
+- `CACHE_STORE=array`
+
+Run migrations against the production database before going live.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

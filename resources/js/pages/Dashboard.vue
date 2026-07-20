@@ -1,27 +1,47 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
+import TrendChart from '@/components/ui/TrendChart.vue';
 import { dashboardApi } from '@/api';
 
 const summary = ref(null);
 const activity = ref([]);
 const warehouseStats = ref([]);
+const orderTrends = ref(null);
+const trendPeriod = ref('day');
 const loading = ref(true);
+const trendsLoading = ref(false);
+
+async function loadTrends() {
+    trendsLoading.value = true;
+    try {
+        orderTrends.value = await dashboardApi.orderTrends(trendPeriod.value);
+    } finally {
+        trendsLoading.value = false;
+    }
+}
 
 onMounted(async () => {
     try {
-        [summary.value, activity.value, warehouseStats.value] = await Promise.all([
+        [summary.value, activity.value, warehouseStats.value, orderTrends.value] = await Promise.all([
             dashboardApi.summary(),
             dashboardApi.recentActivity(),
             dashboardApi.warehouseStats(),
+            dashboardApi.orderTrends(trendPeriod.value),
         ]);
     } finally {
         loading.value = false;
     }
 });
 
+watch(trendPeriod, loadTrends);
+
 function money(v) {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(v ?? 0);
+}
+
+function formatNumber(v) {
+    return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(v ?? 0);
 }
 </script>
 
@@ -51,6 +71,47 @@ function money(v) {
                     <div class="text-sm text-slate-500">Pending POs</div>
                     <div class="mt-2 text-2xl font-bold text-indigo-600">{{ summary?.pending_purchase_orders ?? 0 }}</div>
                 </div>
+            </div>
+
+            <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 class="font-semibold text-slate-900">Procurement Trends</h2>
+                        <p class="mt-1 text-sm text-slate-500">Product units ordered over time</p>
+                        <div v-if="orderTrends?.totals" class="mt-3 flex flex-wrap gap-2">
+                            <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+                                {{ formatNumber(orderTrends.totals.units) }} units ordered
+                            </span>
+                            <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                                {{ formatNumber(orderTrends.totals.orders) }} purchase orders
+                            </span>
+                        </div>
+                    </div>
+                    <div class="inline-flex rounded-xl bg-slate-100 p-1">
+                        <button
+                            type="button"
+                            class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                            :class="trendPeriod === 'day' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                            @click="trendPeriod = 'day'"
+                        >
+                            Daily
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                            :class="trendPeriod === 'month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                            @click="trendPeriod = 'month'"
+                        >
+                            Monthly
+                        </button>
+                    </div>
+                </div>
+                <TrendChart
+                    :labels="orderTrends?.labels ?? []"
+                    :units-ordered="orderTrends?.units_ordered ?? []"
+                    :order-count="orderTrends?.order_count ?? []"
+                    :loading="trendsLoading"
+                />
             </div>
 
             <div class="grid gap-6 xl:grid-cols-2">

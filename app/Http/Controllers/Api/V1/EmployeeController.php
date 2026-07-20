@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\Employee\StoreEmployeeRequest;
+use App\Http\Requests\Employee\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use Illuminate\Http\JsonResponse;
@@ -29,14 +31,14 @@ class EmployeeController extends ApiController
         return $this->success(new EmployeeResource($employee->loadMissing([])));
     }
     
-    public function store(Employee\StoreEmployeeRequest $request): JsonResponse
+    public function store(StoreEmployeeRequest $request): JsonResponse
     {
         $this->authorize('create', Employee::class);
         $model = Employee::create($request->validated());
         return $this->success(new EmployeeResource($model), null, 201);
     }
     
-    public function update(Employee\UpdateEmployeeRequest $request, Employee $employee): JsonResponse
+    public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
     {
         $this->authorize('update', $employee);
         $employee->update($request->validated());

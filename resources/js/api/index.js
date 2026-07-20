@@ -120,6 +120,7 @@ export const dashboardApi = {
     recentActivity: () => api.get('/dashboard/recent-activity').then(unwrap),
     warehouseStats: () => api.get('/dashboard/warehouse-stats').then(unwrap),
     employeeActivity: () => api.get('/dashboard/employee-activity').then(unwrap),
+    orderTrends: (period = 'day') => api.get('/dashboard/order-trends', { params: { period } }).then(unwrap),
 };
 
 export const reportsApi = {

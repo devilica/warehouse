@@ -78,6 +78,7 @@ Route::prefix('v1')->group(function () {
             Route::get('recent-activity', [DashboardController::class, 'recentActivity']);
             Route::get('warehouse-stats', [DashboardController::class, 'warehouseStats']);
             Route::get('employee-activity', [DashboardController::class, 'employeeActivity']);
+            Route::get('order-trends', [DashboardController::class, 'orderTrends']);
         });
 
         Route::get('search', SearchController::class);

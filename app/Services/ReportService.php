@@ -21,7 +21,7 @@ class ReportService
             'inventory-valuation' => fn () => StockLevel::with(['product', 'warehouse'])->get(),
             'stock-movements' => fn () => InventoryTransaction::with(['product', 'warehouse'])->latest()->limit(1000)->get(),
             'purchase-history' => fn () => PurchaseOrder::with(['supplier', 'items'])->latest()->get(),
-            'low-stock' => fn () => Product::whereNotNull('reorder_level')->with('stockLevels')->get(),
+            'low-stock' => fn () => Product::where('min_stock', '>', 0)->with('stockLevels')->get(),
             'product-history' => fn () => InventoryTransaction::with('product')->latest()->limit(500)->get(),
         ];
     }

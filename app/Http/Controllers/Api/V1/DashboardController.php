@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class DashboardController extends ApiController
 {
@@ -32,5 +33,14 @@ class DashboardController extends ApiController
     public function employeeActivity(): JsonResponse
     {
         return $this->success($this->dashboardService->employeeActivity());
+    }
+
+    public function orderTrends(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'period' => 'sometimes|in:day,month',
+        ]);
+
+        return $this->success($this->dashboardService->orderTrends($validated['period'] ?? 'day'));
     }
 }
