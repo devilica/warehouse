@@ -5,7 +5,7 @@ import DataTable from '@/components/ui/DataTable.vue';
 import Modal from '@/components/ui/Modal.vue';
 import FormField from '@/components/ui/FormField.vue';
 import AppButton from '@/components/ui/AppButton.vue';
-import { categoriesApi, suppliersApi } from '@/api';
+import { productsApi, categoriesApi, suppliersApi } from '@/api';
 import { unwrapPaginated } from '@/api/client';
 import { usePagination } from '@/composables/usePagination';
 import { useToastStore } from '@/stores/toast';
