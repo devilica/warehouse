@@ -1,0 +1,15 @@
+[
+    "app\/Services\/AuthService.php",
+    "app\/Services\/InventoryService.php",
+    "app\/Services\/PurchaseOrderService.php",
+    "app\/Services\/GoodsReceiptService.php",
+    "app\/Services\/InventoryAdjustmentService.php",
+    "app\/Services\/StockTransferService.php",
+    "app\/Services\/InventoryCountService.php",
+    "app\/Services\/DashboardService.php",
+    "app\/Services\/ReportService.php",
+    "app\/Services\/SearchService.php",
+    "app\/Services\/BarcodeService.php",
+    "app\/Services\/AuditService.php",
+    "app\/Exports\/GenericReportExport.php"
+]
