@@ -7,15 +7,17 @@ use App\Models\Product;
 use App\Models\User;
 use App\Notifications\LowStockNotification;
 use App\Services\DashboardService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Notification;
 
-class SendLowStockNotification
+class SendLowStockNotification implements ShouldQueue
 {
-    public function __construct(private DashboardService $dashboardService) {}
+    use InteractsWithQueue;
 
     public function handle(LowStockDetected $event): void
     {
-        $this->dashboardService->clearCache();
+        app(DashboardService::class)->clearCache();
 
         $product = Product::find($event->product_id);
 

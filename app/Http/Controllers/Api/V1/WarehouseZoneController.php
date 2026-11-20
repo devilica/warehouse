@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\Warehouse\StoreWarehouseZoneRequest;
+use App\Http\Requests\Warehouse\UpdateWarehouseZoneRequest;
 use App\Http\Resources\WarehouseZoneResource;
 use App\Models\Warehouse;
 use App\Models\WarehouseZone;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class WarehouseZoneController extends ApiController
 {
@@ -16,10 +17,10 @@ class WarehouseZoneController extends ApiController
         return $this->success(WarehouseZoneResource::collection($warehouse->zones()->paginate($this->perPage())));
     }
 
-    public function store(Request $request, Warehouse $warehouse): JsonResponse
+    public function store(StoreWarehouseZoneRequest $request, Warehouse $warehouse): JsonResponse
     {
         $this->authorize('update', $warehouse);
-        $zone = $warehouse->zones()->create($request->validate(['name' => 'required|string', 'code' => 'required|string']));
+        $zone = $warehouse->zones()->create($request->validated());
         return $this->success(new WarehouseZoneResource($zone), null, 201);
     }
 
@@ -29,10 +30,10 @@ class WarehouseZoneController extends ApiController
         return $this->success(new WarehouseZoneResource($zone->load('shelves')));
     }
 
-    public function update(Request $request, Warehouse $warehouse, WarehouseZone $zone): JsonResponse
+    public function update(UpdateWarehouseZoneRequest $request, Warehouse $warehouse, WarehouseZone $zone): JsonResponse
     {
         $this->authorize('update', $warehouse);
-        $zone->update($request->validate(['name' => 'sometimes|string', 'code' => 'sometimes|string']));
+        $zone->update($request->validated());
         return $this->success(new WarehouseZoneResource($zone));
     }
 

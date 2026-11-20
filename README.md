@@ -131,6 +131,20 @@ Access has two layers. Spatie roles decide which permission a person has. Larave
 
 The dashboard reads aggregate queries and caches them briefly. The demo seeder clears that cache after it writes, so the first load shows the new numbers.
 
+These patterns are the ones the API is built on:
+
+1. Form requests validate input before the controller runs. Shared rules live in [app/Http/Requests](app/Http/Requests), including zone, shelf, and location requests under [app/Http/Requests/Warehouse](app/Http/Requests/Warehouse).
+2. Policies gate every model. Each policy is in [app/Policies](app/Policies) and registered in [app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php).
+3. API resources name the fields a screen reads. [app/Http/Resources/ProductResource.php](app/Http/Resources/ProductResource.php), [app/Http/Resources/PurchaseOrderResource.php](app/Http/Resources/PurchaseOrderResource.php), and [app/Http/Resources/StockLevelResource.php](app/Http/Resources/StockLevelResource.php) list those fields and any relation that was loaded.
+4. Stock, receipt, and order writes run inside a database transaction. The stock write is in [app/Domains/Inventory/Services/InventoryService.php](app/Domains/Inventory/Services/InventoryService.php).
+5. Eloquent relationships stay on the models. [app/Models/Product.php](app/Models/Product.php) links a product to its category, supplier, barcodes, and stock.
+6. Services hold the workflow. Status changes and stock movements go through classes in [app/Services](app/Services).
+7. Pest covers the behavior that must stay true. The suite lives in [tests](tests) and runs with `php artisan test`.
+8. Slow work is queued. [app/Jobs/CheckExpiringProducts.php](app/Jobs/CheckExpiringProducts.php) runs daily, and [app/Listeners/SendLowStockNotification.php](app/Listeners/SendLowStockNotification.php) implements `ShouldQueue`.
+9. Domain events notify listeners. Events are in [app/Events](app/Events), listeners in [app/Listeners](app/Listeners), and the map is [app/Providers/EventServiceProvider.php](app/Providers/EventServiceProvider.php).
+10. Changes to products and purchase orders are stored by Spatie's activity log on [app/Models/Product.php](app/Models/Product.php) and [app/Models/PurchaseOrder.php](app/Models/PurchaseOrder.php). The audit screen still reads [app/Services/AuditService.php](app/Services/AuditService.php).
+11. The API allows 60 requests a minute per user or IP address, and login allows 5 a minute per IP address. Both limiters are defined in [app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php). The login route uses `throttle:login`.
+
 ## Quality assurance
 
 Automated checks are Pest tests, run with:
@@ -139,7 +153,7 @@ Automated checks are Pest tests, run with:
 php artisan test
 ```
 
-They cover sign-in and the current user ([tests/Feature/AuthTest.php](tests/Feature/AuthTest.php)), stock movements ([tests/Feature/InventoryServiceTest.php](tests/Feature/InventoryServiceTest.php) and [tests/Unit/InventoryServiceTest.php](tests/Unit/InventoryServiceTest.php)), and dashboard order trends ([tests/Feature/DashboardOrderTrendsTest.php](tests/Feature/DashboardOrderTrendsTest.php)). Laravel Pint is available to format PHP.
+They cover sign-in and the current user ([tests/Feature/AuthTest.php](tests/Feature/AuthTest.php)), stock movements ([tests/Feature/InventoryServiceTest.php](tests/Feature/InventoryServiceTest.php) and [tests/Unit/InventoryServiceTest.php](tests/Unit/InventoryServiceTest.php)), dashboard order trends ([tests/Feature/DashboardOrderTrendsTest.php](tests/Feature/DashboardOrderTrendsTest.php)), product search and pagination ([tests/Feature/SearchTest.php](tests/Feature/SearchTest.php), [tests/Feature/ProductIndexTest.php](tests/Feature/ProductIndexTest.php)), purchase orders ([tests/Unit/PurchaseOrderServiceTest.php](tests/Unit/PurchaseOrderServiceTest.php), [tests/Feature/PurchaseOrderSendTest.php](tests/Feature/PurchaseOrderSendTest.php)), goods receipts ([tests/Unit/GoodsReceiptServiceTest.php](tests/Unit/GoodsReceiptServiceTest.php)), and password changes ([tests/Unit/AuthServiceTest.php](tests/Unit/AuthServiceTest.php)). [tests/Feature/ArchitectureTest.php](tests/Feature/ArchitectureTest.php) checks a missing `products.create` permission (403), a product edit in `activity_log`, a sixth login in the same minute (429), and the queued low-stock listener. Laravel Pint is available to format PHP.
 
 The main screens were also exercised in the browser after the seed and the button changes: sign-in, purchase orders, inventory counts, transfers, products, and reports. A button that the API would reject for the current status is not rendered.
 
