@@ -3,7 +3,6 @@ import { computed, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermission } from '@/composables/usePermission';
-import AppButton from '@/components/ui/AppButton.vue';
 import NavIcon from '@/components/ui/NavIcon.vue';
 
 const props = defineProps({
@@ -122,7 +121,19 @@ async function logout() {
                 <div class="truncate text-sm font-medium text-white">{{ auth.user?.name }}</div>
                 <div class="truncate text-xs text-slate-500">{{ auth.user?.email }}</div>
             </div>
-            <AppButton variant="danger" size="sm" @click="logout">Logout</AppButton>
+            <button
+                type="button"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-rose-300/90 transition hover:bg-rose-500/15 hover:text-rose-200"
+                aria-label="Logout"
+                title="Logout"
+                @click="logout"
+            >
+                <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 4.5H7.5A2.25 2.25 0 0 0 5.25 6.75v10.5A2.25 2.25 0 0 0 7.5 19.5H9" />
+                    <path d="M15.75 8.25 19.5 12l-3.75 3.75" />
+                    <path d="M9.75 12H19.5" />
+                </svg>
+            </button>
         </div>
     </aside>
 </template>
