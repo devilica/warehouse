@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router';
 import VueApexCharts from 'vue3-apexcharts';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import TrendChart from '@/components/ui/TrendChart.vue';
+import Skeleton from '@/components/ui/Skeleton.vue';
 import { dashboardApi } from '@/api';
 
 const summary = ref(null);
@@ -137,8 +138,44 @@ function warehouseShare(row) {
             </div>
         </div>
 
-        <div v-if="loading" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div v-for="n in 4" :key="n" class="h-32 animate-pulse rounded-3xl bg-white" />
+        <div v-if="loading" aria-busy="true">
+            <span class="sr-only">Loading</span>
+            <div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div v-for="n in 4" :key="n" class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <Skeleton class="h-4 w-24" />
+                    <Skeleton class="mt-4 h-8 w-32" />
+                </div>
+            </div>
+            <div class="mb-6 grid gap-6 xl:grid-cols-3">
+                <div class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm xl:col-span-2">
+                    <Skeleton class="h-5 w-40" />
+                    <Skeleton class="mt-2 h-4 w-56" />
+                    <div class="mt-8 flex h-64 items-end gap-2">
+                        <Skeleton v-for="(height, index) in [40, 65, 50, 80, 45, 90, 60, 75]" :key="index" class="min-w-0 flex-1 rounded-t-xl" :style="{ height: `${height}%` }" />
+                    </div>
+                </div>
+                <div class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <Skeleton class="h-5 w-36" />
+                    <Skeleton class="mx-auto mt-6 h-40 w-40 rounded-full" />
+                    <div class="mt-6 space-y-3">
+                        <Skeleton v-for="n in 3" :key="n" class="h-4 w-full" />
+                    </div>
+                </div>
+            </div>
+            <div class="grid gap-6 xl:grid-cols-2">
+                <div v-for="panel in 2" :key="panel" class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <Skeleton class="h-5 w-36" />
+                    <div class="mt-5 space-y-4">
+                        <div v-for="n in 5" :key="n" class="flex items-center gap-3">
+                            <Skeleton class="h-10 w-10 shrink-0 rounded-2xl" />
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <Skeleton class="h-4 w-2/3" />
+                                <Skeleton class="h-3 w-1/3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <template v-else>
             <div class="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">

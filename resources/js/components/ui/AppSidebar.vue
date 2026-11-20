@@ -100,7 +100,7 @@ async function logout() {
                 <div class="text-base font-bold leading-tight text-white">Warehouse CMS</div>
             </div>
         </div>
-        <nav class="flex-1 overflow-y-auto px-3 py-2">
+        <nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-2">
             <div v-for="group in navGroups" :key="group.title" class="mb-4">
                 <div class="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ group.title }}</div>
                 <RouterLink

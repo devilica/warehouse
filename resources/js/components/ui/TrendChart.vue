@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
+import Skeleton from '@/components/ui/Skeleton.vue';
 
 const props = defineProps({
     labels: { type: Array, default: () => [] },
@@ -92,8 +93,14 @@ const chartOptions = computed(() => ({
 
 <template>
     <div class="relative min-h-[320px]">
-        <div v-if="loading" class="absolute inset-0 flex items-center justify-center text-sm text-slate-400">
-            Loading chart...
+        <div v-if="loading" class="flex h-[320px] items-end gap-2 px-2" aria-busy="true">
+            <span class="sr-only">Loading chart</span>
+            <Skeleton
+                v-for="(height, index) in [42, 68, 55, 80, 48, 90, 62, 74, 50, 86, 60, 78]"
+                :key="index"
+                class="min-w-0 flex-1 rounded-t-xl"
+                :style="{ height: `${height}%` }"
+            />
         </div>
         <VueApexCharts
             v-else

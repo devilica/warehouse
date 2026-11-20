@@ -31,7 +31,7 @@ abstract class ApiController extends Controller
         });
     }
 
-    protected function success(mixed $data = null, ?string $message = 'OK', int $status = 200): JsonResponse
+    protected function success(mixed $data = null, ?string $message = 'OK', int $status = 200, array $extraMeta = []): JsonResponse
     {
         $meta = null;
 
@@ -48,8 +48,8 @@ abstract class ApiController extends Controller
             'data' => $data,
         ];
 
-        if ($meta !== null) {
-            $payload['meta'] = $meta;
+        if ($meta !== null || $extraMeta !== []) {
+            $payload['meta'] = array_merge($meta ?? [], $extraMeta);
         }
 
         return response()->json($payload, $status);

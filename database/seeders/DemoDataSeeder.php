@@ -864,10 +864,19 @@ class DemoDataSeeder extends Seeder
 
     private function seedNotifications(): void
     {
-        $missing = 20 - DB::table('notifications')->count();
         $user = User::where('email', 'admin@wms.test')->first() ?? User::first();
 
-        if ($missing <= 0 || ! $user) {
+        if (! $user) {
+            return;
+        }
+
+        $existing = DB::table('notifications')
+            ->where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->count();
+        $missing = 12 - $existing;
+
+        if ($missing <= 0) {
             return;
         }
 

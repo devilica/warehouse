@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import AppButton from '@/components/ui/AppButton.vue';
+import Skeleton from '@/components/ui/Skeleton.vue';
 
 const props = defineProps({
     columns: { type: Array, required: true },
@@ -31,6 +32,10 @@ function sortMark(key) {
     if (props.sort === `-${key}`) return '↓';
     return '↕';
 }
+
+function barClass(index) {
+    return ['w-16', 'w-40', 'w-24', 'w-32', 'w-20'][index % 5];
+}
 </script>
 
 <template>
@@ -52,22 +57,32 @@ function sortMark(key) {
                 <option v-for="status in statuses" :key="status" :value="status">{{ status.replaceAll('_', ' ') }}</option>
             </select>
         </div>
-        <div class="space-y-3 p-3 lg:hidden">
-            <p v-if="loading" class="py-10 text-center text-sm text-slate-400">Loading...</p>
+        <div class="space-y-3 p-3 lg:hidden" :aria-busy="loading">
+            <template v-if="loading">
+                <p class="sr-only">Loading</p>
+                <article v-for="n in 6" :key="n" class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                    <div v-for="(col, index) in columns" :key="col.key" class="flex items-center justify-between gap-3 border-b border-slate-100 py-2 last:border-0">
+                        <Skeleton class="h-3 w-16" />
+                        <Skeleton class="h-3" :class="barClass(index)" />
+                    </div>
+                </article>
+            </template>
             <p v-else-if="!rows.length" class="py-10 text-center text-sm text-slate-400">No records found</p>
-            <article v-for="row in rows" v-else :key="row.id" class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
-                <div v-for="col in columns" :key="col.key" class="flex items-start justify-between gap-3 border-b border-slate-100 py-2 last:border-0">
-                    <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{{ col.label }}</span>
-                    <span class="min-w-0 break-words text-right text-sm text-slate-800">
-                        <slot :name="`cell-${col.key}`" :row="row">
-                            {{ row[col.key] ?? '—' }}
-                        </slot>
-                    </span>
-                </div>
-                <div v-if="$slots.actions" class="mt-3 flex flex-wrap justify-end gap-2">
-                    <slot name="actions" :row="row" />
-                </div>
-            </article>
+            <template v-else>
+                <article v-for="row in rows" :key="row.id" class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                    <div v-for="col in columns" :key="col.key" class="flex items-start justify-between gap-3 border-b border-slate-100 py-2 last:border-0">
+                        <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{{ col.label }}</span>
+                        <span class="min-w-0 break-words text-right text-sm text-slate-800">
+                            <slot :name="`cell-${col.key}`" :row="row">
+                                {{ row[col.key] ?? '—' }}
+                            </slot>
+                        </span>
+                    </div>
+                    <div v-if="$slots.actions" class="mt-3 flex flex-wrap justify-end gap-2">
+                        <slot name="actions" :row="row" />
+                    </div>
+                </article>
+            </template>
         </div>
         <div class="hidden overflow-x-auto lg:block">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -88,25 +103,35 @@ function sortMark(key) {
                         <th v-if="$slots.actions" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <tr v-if="loading">
-                        <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="px-4 py-10 text-center text-slate-400">Loading...</td>
-                    </tr>
+                <tbody class="divide-y divide-slate-100" :aria-busy="loading">
+                    <template v-if="loading">
+                        <tr class="sr-only"><td>Loading</td></tr>
+                        <tr v-for="n in 8" :key="n">
+                            <td v-for="(col, index) in columns" :key="col.key" class="px-4 py-3">
+                                <Skeleton class="h-4" :class="barClass(index)" />
+                            </td>
+                            <td v-if="$slots.actions" class="px-4 py-3 text-right">
+                                <Skeleton class="ml-auto h-8 w-20" />
+                            </td>
+                        </tr>
+                    </template>
                     <tr v-else-if="!rows.length">
                         <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="px-4 py-10 text-center text-slate-400">No records found</td>
                     </tr>
-                    <tr v-for="row in rows" :key="row.id" class="transition hover:bg-indigo-50/40">
-                        <td v-for="col in columns" :key="col.key" class="px-4 py-3 text-slate-700">
-                            <slot :name="`cell-${col.key}`" :row="row">
-                                {{ row[col.key] ?? '—' }}
-                            </slot>
-                        </td>
-                        <td v-if="$slots.actions" class="px-4 py-3">
-                            <div class="flex items-center justify-end gap-2 whitespace-nowrap">
-                                <slot name="actions" :row="row" />
-                            </div>
-                        </td>
-                    </tr>
+                    <template v-else>
+                        <tr v-for="row in rows" :key="row.id" class="transition hover:bg-indigo-50/40">
+                            <td v-for="col in columns" :key="col.key" class="px-4 py-3 text-slate-700">
+                                <slot :name="`cell-${col.key}`" :row="row">
+                                    {{ row[col.key] ?? '—' }}
+                                </slot>
+                            </td>
+                            <td v-if="$slots.actions" class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                                    <slot name="actions" :row="row" />
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
         </div>

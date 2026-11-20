@@ -9,7 +9,11 @@ class NotificationController extends ApiController
 {
     public function index(Request $request): JsonResponse
     {
-        return $this->success($request->user()->notifications()->paginate($this->perPage()));
+        $notifications = $request->user()->notifications()->latest()->paginate($this->perPage());
+
+        return $this->success($notifications, 'OK', 200, [
+            'unread_count' => $request->user()->unreadNotifications()->count(),
+        ]);
     }
 
     public function markRead(Request $request, string $id): JsonResponse

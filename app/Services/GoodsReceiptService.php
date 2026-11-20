@@ -23,8 +23,8 @@ class GoodsReceiptService
             foreach ($receipt->items as $item) {
                 $this->inventoryService->recordMovement([
                     'product_id' => $item->product_id,
-                    'warehouse_id' => $receipt->warehouse_id,
-                    'warehouse_location_id' => $item->warehouse_location_id,
+                    'warehouse_id' => $receipt->warehouse_id ?? $item->warehouse_id,
+                    'warehouse_location_id' => $item->warehouse_location_id ?? $item->location_id,
                     'quantity' => $item->quantity_received,
                     'type' => 'purchase',
                     'reference_type' => GoodsReceipt::class,
@@ -33,7 +33,12 @@ class GoodsReceiptService
                 ]);
             }
 
-            $receipt->update(['status' => 'confirmed', 'confirmed_at' => now(), 'confirmed_by' => auth()->id()]);
+            $updates = ['status' => 'confirmed'];
+            if ($receipt->getConnection()->getSchemaBuilder()->hasColumn($receipt->getTable(), 'confirmed_at')) {
+                $updates['confirmed_at'] = now();
+                $updates['confirmed_by'] = auth()->id();
+            }
+            $receipt->update($updates);
 
             event(new GoodsReceiptConfirmed(goodsReceipt: $receipt));
 
