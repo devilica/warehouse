@@ -4,11 +4,11 @@ import AppTopbar from '@/components/ui/AppTopbar.vue';
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-slate-50">
+    <div class="flex min-h-screen bg-slate-100/80">
         <AppSidebar />
-        <div class="flex min-h-screen flex-1 flex-col">
+        <div class="flex min-h-screen min-w-0 flex-1 flex-col">
             <AppTopbar />
-            <main class="flex-1 p-6">
+            <main class="flex-1 p-6 lg:p-8">
                 <slot />
             </main>
         </div>

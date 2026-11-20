@@ -17,8 +17,8 @@ class StockLevelController extends ApiController
         $items = QueryBuilder::for(StockLevel::class)
             ->allowedFilters([AllowedFilter::exact('warehouse_id'), AllowedFilter::exact('product_id')])
             ->allowedIncludes([AllowedInclude::relationship('product'), AllowedInclude::relationship('warehouse')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['quantity', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(StockLevelResource::collection($items));
     }

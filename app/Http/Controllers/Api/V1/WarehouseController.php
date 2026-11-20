@@ -15,10 +15,10 @@ class WarehouseController extends ApiController
     {
         $this->authorize('viewAny', Warehouse::class);
         $items = QueryBuilder::for(Warehouse::class)
-            ->allowedFilters([AllowedFilter::partial('name')])
+            ->allowedFilters([$this->searchFilter('name'), AllowedFilter::partial('name')])
             ->allowedIncludes([AllowedInclude::relationship('zones')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['name', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(WarehouseResource::collection($items));
     }

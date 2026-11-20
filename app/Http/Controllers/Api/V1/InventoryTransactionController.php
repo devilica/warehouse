@@ -15,10 +15,10 @@ class InventoryTransactionController extends ApiController
     {
         $this->authorize('viewAny', InventoryTransaction::class);
         $items = QueryBuilder::for(InventoryTransaction::class)
-            ->allowedFilters([AllowedFilter::exact('type'), AllowedFilter::exact('warehouse_id')])
+            ->allowedFilters([$this->searchFilter('type'), AllowedFilter::exact('type'), AllowedFilter::exact('warehouse_id')])
             ->allowedIncludes([AllowedInclude::relationship('product'), AllowedInclude::relationship('warehouse')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['type', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(InventoryTransactionResource::collection($items));
     }

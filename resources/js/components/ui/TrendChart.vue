@@ -26,10 +26,10 @@ const chartOptions = computed(() => ({
             speed: 600,
         },
     },
-    colors: ['#6366f1', '#f59e0b'],
+    colors: ['#7c5cfc', '#f5a524'],
     stroke: {
         curve: 'smooth',
-        width: [0, 3],
+        width: [2.5, 3],
     },
     fill: {
         type: ['gradient', 'solid'],
@@ -42,7 +42,7 @@ const chartOptions = computed(() => ({
     },
     dataLabels: { enabled: false },
     grid: {
-        borderColor: '#e2e8f0',
+        borderColor: '#f1f5f9',
         strokeDashArray: 4,
         xaxis: { lines: { show: false } },
     },

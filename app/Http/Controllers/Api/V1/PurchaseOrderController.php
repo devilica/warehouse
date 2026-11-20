@@ -19,9 +19,10 @@ class PurchaseOrderController extends ApiController
     {
         $this->authorize('viewAny', PurchaseOrder::class);
         $items = QueryBuilder::for(PurchaseOrder::class)
-            ->allowedFilters([AllowedFilter::exact('status'), AllowedFilter::exact('supplier_id')])
+            ->allowedFilters([$this->searchFilter('number'), AllowedFilter::exact('status'), AllowedFilter::exact('supplier_id')])
             ->allowedIncludes([AllowedInclude::relationship('supplier'), AllowedInclude::relationship('items')])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['number', 'status', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(PurchaseOrderResource::collection($items));
     }

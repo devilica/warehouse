@@ -15,10 +15,10 @@ class SupplierController extends ApiController
     {
         $this->authorize('viewAny', Supplier::class);
         $items = QueryBuilder::for(Supplier::class)
-            ->allowedFilters([AllowedFilter::partial('name'), AllowedFilter::exact('code')])
+            ->allowedFilters([$this->searchFilter('company_name', 'email'), AllowedFilter::partial('company_name'), AllowedFilter::exact('code')])
             ->allowedIncludes([AllowedInclude::relationship('contacts')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['company_name', 'email', 'phone', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(SupplierResource::collection($items));
     }

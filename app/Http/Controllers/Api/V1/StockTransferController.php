@@ -8,6 +8,7 @@ use App\Models\StockTransfer;
 use App\Services\StockTransferService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class StockTransferController extends ApiController
@@ -17,7 +18,12 @@ class StockTransferController extends ApiController
     public function index(): JsonResponse
     {
         $this->authorize('viewAny', StockTransfer::class);
-        return $this->success(StockTransferResource::collection(QueryBuilder::for(StockTransfer::class)->paginate()));
+        $items = QueryBuilder::for(StockTransfer::class)
+            ->allowedFilters([AllowedFilter::exact('status')])
+            ->allowedSorts(['status', 'created_at', 'id'])
+            ->paginate($this->perPage());
+
+        return $this->success(StockTransferResource::collection($items));
     }
 
     public function show(StockTransfer $stockTransfer): JsonResponse

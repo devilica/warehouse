@@ -35,9 +35,22 @@ export function unwrap(response) {
 }
 
 export function unwrapPaginated(response) {
-    const payload = response.data?.data ?? response.data;
-    if (payload?.data && payload?.meta) {
-        return payload;
+    const body = response.data ?? {};
+    if (Array.isArray(body.data) && body.meta) {
+        return { data: body.data, meta: body.meta, links: body.links ?? {} };
+    }
+    const payload = body.data ?? body;
+    if (payload?.data && (payload?.meta || payload?.current_page)) {
+        return {
+            data: payload.data,
+            meta: payload.meta ?? {
+                current_page: payload.current_page,
+                last_page: payload.last_page,
+                per_page: payload.per_page,
+                total: payload.total,
+            },
+            links: payload.links ?? {},
+        };
     }
     return { data: Array.isArray(payload) ? payload : [], meta: {}, links: {} };
 }

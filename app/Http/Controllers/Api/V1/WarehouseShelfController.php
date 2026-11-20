@@ -14,7 +14,7 @@ class WarehouseShelfController extends ApiController
     public function index(Warehouse $warehouse, WarehouseZone $zone): JsonResponse
     {
         $this->authorize('view', $warehouse);
-        return $this->success(WarehouseShelfResource::collection($zone->shelves()->paginate()));
+        return $this->success(WarehouseShelfResource::collection($zone->shelves()->paginate($this->perPage())));
     }
 
     public function store(Request $request, Warehouse $warehouse, WarehouseZone $zone): JsonResponse

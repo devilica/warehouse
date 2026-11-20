@@ -19,10 +19,10 @@ class UserController extends ApiController
         $this->authorize('viewAny', User::class);
         $items = QueryBuilder::for(User::class)
             ->with('roles')
-            ->allowedFilters([AllowedFilter::partial('name'), AllowedFilter::partial('email')])
+            ->allowedFilters([$this->searchFilter('name', 'email'), AllowedFilter::partial('name'), AllowedFilter::partial('email')])
             ->allowedIncludes([AllowedInclude::relationship('roles')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['name', 'email', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(UserResource::collection($items));
     }

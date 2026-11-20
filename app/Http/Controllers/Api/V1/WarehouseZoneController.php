@@ -13,7 +13,7 @@ class WarehouseZoneController extends ApiController
     public function index(Warehouse $warehouse): JsonResponse
     {
         $this->authorize('view', $warehouse);
-        return $this->success(WarehouseZoneResource::collection($warehouse->zones()->paginate()));
+        return $this->success(WarehouseZoneResource::collection($warehouse->zones()->paginate($this->perPage())));
     }
 
     public function store(Request $request, Warehouse $warehouse): JsonResponse

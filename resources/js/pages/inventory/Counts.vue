@@ -15,7 +15,8 @@ import { usePermission } from '@/composables/usePermission';
 const router = useRouter();
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(countsApi.list);
+const { items, meta, loading, params, load, goToPage, setSort, setStatus } = usePagination(countsApi.list);
+const statuses = ['scheduled', 'in_progress', 'completed', 'cancelled'];
 const showModal = ref(false);
 const form = ref({ warehouse_id: '' });
 
@@ -31,7 +32,7 @@ async function finalize(row) { await countsApi.finalize(row.id); toast.success('
             <div><h1 class="text-2xl font-bold">Inventory Counts</h1></div>
             <AppButton v-if="can('inventory-counts.create')" @click="showModal = true">New Count</AppButton>
         </div>
-        <DataTable :columns="[{key:'id',label:'#'},{key:'status',label:'Status'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'status',label:'Status',sortable:true}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" @page="goToPage" @sort="setSort" @status="setStatus">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
                 <AppButton size="sm" variant="secondary" @click="router.push(`/inventory/counts/${row.id}`)">View</AppButton>

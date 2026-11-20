@@ -16,14 +16,14 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(warehousesApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(warehousesApi.list);
 const showModal = ref(false);
 const editing = ref(null);
 const form = ref({ name: '', code: '' });
 const saving = ref(false);
 
 const columns = [
-    { key: 'name', label: 'Name' },
+    { key: 'name', label: 'Name', sortable: true },
     { key: 'code', label: 'Code' },
     { key: 'is_active', label: 'Status' },
 ];
@@ -78,7 +78,7 @@ async function remove(row) {
             </div>
             <AppButton v-if="can('warehouses.create')" @click="openCreate">Add Warehouse</AppButton>
         </div>
-        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #cell-is_active="{ row }">
                 <Badge :variant="row.is_active ? 'success' : 'default'">{{ row.is_active ? 'Active' : 'Inactive' }}</Badge>
             </template>

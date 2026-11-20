@@ -12,7 +12,7 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(categoriesApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(categoriesApi.list);
 const showModal = ref(false);
 const editing = ref(null);
 const form = ref({ name: '', code: '' });
@@ -43,7 +43,7 @@ async function remove(row) { if (!confirm('Delete?')) return; await categoriesAp
             <div><h1 class="text-2xl font-bold">Categories</h1></div>
             <AppButton v-if="can('categories.create')" @click="openCreate">Add Category</AppButton>
         </div>
-        <DataTable :columns="[{key:'name',label:'Name'},{key:'code',label:'Code'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="[{key:'name',label:'Name',sortable:true},{key:'code',label:'Code'}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
                 <AppButton v-if="can('categories.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
                 <AppButton v-if="can('categories.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>

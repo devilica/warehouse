@@ -20,9 +20,10 @@ class ProductController extends ApiController
     {
         $this->authorize('viewAny', Product::class);
         $items = QueryBuilder::for(Product::class)
-            ->allowedFilters([AllowedFilter::partial('name'), AllowedFilter::partial('sku')])
+            ->allowedFilters([$this->searchFilter('name', 'sku'), AllowedFilter::partial('name'), AllowedFilter::partial('sku')])
             ->allowedIncludes([AllowedInclude::relationship('category'), AllowedInclude::relationship('barcodes')])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['name', 'sku', 'created_at', 'id'])
+            ->paginate($this->perPage());
         return $this->success(ProductResource::collection($items));
     }
 

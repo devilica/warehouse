@@ -15,7 +15,7 @@ class WarehouseLocationController extends ApiController
     public function index(Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf): JsonResponse
     {
         $this->authorize('view', $warehouse);
-        return $this->success(WarehouseLocationResource::collection($shelf->locations()->paginate()));
+        return $this->success(WarehouseLocationResource::collection($shelf->locations()->paginate($this->perPage())));
     }
 
     public function store(Request $request, Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf): JsonResponse

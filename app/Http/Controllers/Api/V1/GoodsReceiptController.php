@@ -7,6 +7,7 @@ use App\Http\Resources\GoodsReceiptResource;
 use App\Models\GoodsReceipt;
 use App\Services\GoodsReceiptService;
 use Illuminate\Http\JsonResponse;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class GoodsReceiptController extends ApiController
@@ -16,7 +17,12 @@ class GoodsReceiptController extends ApiController
     public function index(): JsonResponse
     {
         $this->authorize('viewAny', GoodsReceipt::class);
-        return $this->success(GoodsReceiptResource::collection(QueryBuilder::for(GoodsReceipt::class)->paginate()));
+        $items = QueryBuilder::for(GoodsReceipt::class)
+            ->allowedFilters([AllowedFilter::exact('status')])
+            ->allowedSorts(['status', 'created_at', 'id'])
+            ->paginate($this->perPage());
+
+        return $this->success(GoodsReceiptResource::collection($items));
     }
 
     public function show(GoodsReceipt $goodsReceipt): JsonResponse

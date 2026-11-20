@@ -8,6 +8,7 @@ use App\Models\InventoryCount;
 use App\Services\InventoryCountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class InventoryCountController extends ApiController
@@ -17,7 +18,12 @@ class InventoryCountController extends ApiController
     public function index(): JsonResponse
     {
         $this->authorize('viewAny', InventoryCount::class);
-        return $this->success(InventoryCountResource::collection(QueryBuilder::for(InventoryCount::class)->paginate()));
+        $items = QueryBuilder::for(InventoryCount::class)
+            ->allowedFilters([AllowedFilter::exact('status')])
+            ->allowedSorts(['status', 'created_at', 'id'])
+            ->paginate($this->perPage());
+
+        return $this->success(InventoryCountResource::collection($items));
     }
 
     public function show(InventoryCount $inventoryCount): JsonResponse

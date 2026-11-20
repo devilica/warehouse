@@ -13,7 +13,7 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(productsApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(productsApi.list);
 const categories = ref([]);
 const suppliers = ref([]);
 const showModal = ref(false);
@@ -22,8 +22,8 @@ const form = ref({ name: '', sku: '', category_id: '', supplier_id: '' });
 const saving = ref(false);
 
 const columns = [
-    { key: 'name', label: 'Product' },
-    { key: 'sku', label: 'SKU' },
+    { key: 'name', label: 'Product', sortable: true },
+    { key: 'sku', label: 'SKU', sortable: true },
     { key: 'category_id', label: 'Category' },
 ];
 
@@ -81,7 +81,7 @@ async function remove(row) {
             </div>
             <AppButton v-if="can('products.create')" @click="openCreate">Add Product</AppButton>
         </div>
-        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name or SKU" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
                 <div class="flex justify-end gap-2">
                     <AppButton v-if="can('products.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>

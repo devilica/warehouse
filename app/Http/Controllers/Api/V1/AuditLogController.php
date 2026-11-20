@@ -18,7 +18,7 @@ class AuditLogController extends ApiController
             ->allowedFilters([AllowedFilter::exact('action')])
             ->allowedIncludes([AllowedInclude::relationship('user')])
             ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->paginate($this->perPage());
 
         return $this->success(AuditLogResource::collection($items));
     }

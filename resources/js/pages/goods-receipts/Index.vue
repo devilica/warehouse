@@ -13,7 +13,8 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(goodsReceiptsApi.list);
+const { items, meta, loading, params, load, goToPage, setSort, setStatus } = usePagination(goodsReceiptsApi.list);
+const statuses = ['draft', 'in_progress', 'confirmed', 'cancelled'];
 const showModal = ref(false);
 const form = ref({ purchase_order_id: '', warehouse_id: '' });
 
@@ -28,7 +29,7 @@ async function confirm(row) { await goodsReceiptsApi.confirm(row.id); toast.succ
             <div><h1 class="text-2xl font-bold">Goods Receipts</h1></div>
             <AppButton v-if="can('goods-receipts.create')" @click="showModal = true">Create Receipt</AppButton>
         </div>
-        <DataTable :columns="[{key:'id',label:'#'},{key:'status',label:'Status'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'status',label:'Status',sortable:true}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" @page="goToPage" @sort="setSort" @status="setStatus">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
                 <AppButton v-if="can('goods-receipts.confirm') && row.status !== 'confirmed'" size="sm" @click="confirm(row)">Confirm</AppButton>

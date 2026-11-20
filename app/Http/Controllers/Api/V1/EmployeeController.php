@@ -17,10 +17,10 @@ class EmployeeController extends ApiController
     {
         $this->authorize('viewAny', Employee::class);
         $items = QueryBuilder::for(Employee::class)
-            ->allowedFilters([AllowedFilter::partial('first_name'), AllowedFilter::partial('last_name')])
+            ->allowedFilters([$this->searchFilter('first_name', 'last_name'), AllowedFilter::partial('first_name'), AllowedFilter::partial('last_name')])
             ->allowedIncludes([AllowedInclude::relationship('department'), AllowedInclude::relationship('user')])
-            ->allowedSorts(['created_at', 'id'])
-            ->paginate(request('per_page', 15));
+            ->allowedSorts(['first_name', 'last_name', 'phone', 'created_at', 'id'])
+            ->paginate($this->perPage());
 
         return $this->success(EmployeeResource::collection($items));
     }

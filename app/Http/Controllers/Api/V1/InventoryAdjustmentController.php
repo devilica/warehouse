@@ -8,6 +8,7 @@ use App\Models\InventoryAdjustment;
 use App\Services\InventoryAdjustmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class InventoryAdjustmentController extends ApiController
@@ -17,7 +18,12 @@ class InventoryAdjustmentController extends ApiController
     public function index(): JsonResponse
     {
         $this->authorize('viewAny', InventoryAdjustment::class);
-        return $this->success(InventoryAdjustmentResource::collection(QueryBuilder::for(InventoryAdjustment::class)->paginate()));
+        $items = QueryBuilder::for(InventoryAdjustment::class)
+            ->allowedFilters([$this->searchFilter('reason'), AllowedFilter::exact('status')])
+            ->allowedSorts(['status', 'created_at', 'id'])
+            ->paginate($this->perPage());
+
+        return $this->success(InventoryAdjustmentResource::collection($items));
     }
 
     public function show(InventoryAdjustment $inventoryAdjustment): JsonResponse

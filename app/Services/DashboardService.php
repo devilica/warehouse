@@ -42,6 +42,16 @@ class DashboardService
                     })
                     ->count(),
                 'out_of_stock_count' => Product::whereDoesntHave('stockLevels', fn ($q) => $q->where('quantity', '>', 0))->count(),
+                'in_stock_count' => Product::whereHas('stockLevels', fn ($q) => $q->where('quantity', '>', 0))
+                    ->where(function ($query) {
+                        $query->where('min_stock', '<=', 0)
+                            ->orWhere('min_stock', '<', function ($stock) {
+                                $stock->from('stock_levels')
+                                    ->selectRaw('COALESCE(SUM(quantity), 0)')
+                                    ->whereColumn('stock_levels.product_id', 'products.id');
+                            });
+                    })
+                    ->count(),
                 'pending_purchase_orders' => PurchaseOrder::whereIn('status', ['draft', 'sent'])->count(),
             ];
         });

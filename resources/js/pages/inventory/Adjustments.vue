@@ -13,7 +13,8 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(adjustmentsApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort, setStatus } = usePagination(adjustmentsApi.list);
+const statuses = ['draft', 'pending_approval', 'approved', 'rejected', 'cancelled'];
 const showModal = ref(false);
 const form = ref({ warehouse_id: '', reason: '' });
 
@@ -28,7 +29,7 @@ async function approve(row) { await adjustmentsApi.approve(row.id); toast.succes
             <div><h1 class="text-2xl font-bold">Inventory Adjustments</h1></div>
             <AppButton v-if="can('inventory-adjustments.create')" @click="showModal = true">New Adjustment</AppButton>
         </div>
-        <DataTable :columns="[{key:'id',label:'#'},{key:'status',label:'Status'},{key:'reason',label:'Reason'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'status',label:'Status',sortable:true},{key:'reason',label:'Reason'}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" searchable search-placeholder="Search reason" @page="goToPage" @search="setSearch" @sort="setSort" @status="setStatus">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
                 <AppButton v-if="can('inventory-adjustments.approve') && row.status === 'pending'" size="sm" @click="approve(row)">Approve</AppButton>

@@ -12,16 +12,16 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(employeesApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(employeesApi.list);
 const showModal = ref(false);
 const editing = ref(null);
 const form = ref({ first_name: '', last_name: '', phone: '', department_id: '' });
 const saving = ref(false);
 
 const columns = [
-    { key: 'first_name', label: 'First Name' },
-    { key: 'last_name', label: 'Last Name' },
-    { key: 'phone', label: 'Phone' },
+    { key: 'first_name', label: 'First Name', sortable: true },
+    { key: 'last_name', label: 'Last Name', sortable: true },
+    { key: 'phone', label: 'Phone', sortable: true },
 ];
 
 onMounted(load);
@@ -74,7 +74,7 @@ async function remove(row) {
             </div>
             <AppButton v-if="can('employees.create')" @click="openCreate">Add Employee</AppButton>
         </div>
-        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
                 <div class="flex justify-end gap-2">
                     <AppButton v-if="can('employees.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>

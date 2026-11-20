@@ -12,7 +12,7 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, load, goToPage } = usePagination(suppliersApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(suppliersApi.list);
 const showModal = ref(false);
 const editing = ref(null);
 const form = ref({ name: '', email: '', phone: '' });
@@ -44,7 +44,7 @@ async function remove(row) { if (!confirm('Delete?')) return; await suppliersApi
             <div><h1 class="text-2xl font-bold">Suppliers</h1></div>
             <AppButton v-if="can('suppliers.create')" @click="openCreate">Add Supplier</AppButton>
         </div>
-        <DataTable :columns="[{key:'name',label:'Name'},{key:'email',label:'Email'},{key:'phone',label:'Phone'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
+        <DataTable :columns="[{key:'company_name',label:'Name',sortable:true},{key:'email',label:'Email',sortable:true},{key:'phone',label:'Phone',sortable:true}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name or email" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
                 <AppButton v-if="can('suppliers.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
                 <AppButton v-if="can('suppliers.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
