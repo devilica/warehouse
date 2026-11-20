@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\Supplier\StoreSupplierRequest;
+use App\Http\Requests\Supplier\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +17,7 @@ class SupplierController extends ApiController
     {
         $this->authorize('viewAny', Supplier::class);
         $items = QueryBuilder::for(Supplier::class)
-            ->allowedFilters([$this->searchFilter('company_name', 'email'), AllowedFilter::partial('company_name'), AllowedFilter::exact('code')])
+            ->allowedFilters([$this->searchFilter('company_name', 'email'), AllowedFilter::partial('company_name')])
             ->allowedIncludes([AllowedInclude::relationship('contacts')])
             ->allowedSorts(['company_name', 'email', 'phone', 'created_at', 'id'])
             ->paginate($this->perPage());
@@ -29,14 +31,14 @@ class SupplierController extends ApiController
         return $this->success(new SupplierResource($supplier->loadMissing([])));
     }
     
-    public function store(Supplier\StoreSupplierRequest $request): JsonResponse
+    public function store(StoreSupplierRequest $request): JsonResponse
     {
         $this->authorize('create', Supplier::class);
         $model = Supplier::create($request->validated());
         return $this->success(new SupplierResource($model), null, 201);
     }
     
-    public function update(Supplier\UpdateSupplierRequest $request, Supplier $supplier): JsonResponse
+    public function update(UpdateSupplierRequest $request, Supplier $supplier): JsonResponse
     {
         $this->authorize('update', $supplier);
         $supplier->update($request->validated());

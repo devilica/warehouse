@@ -13,7 +13,7 @@ import { usePermission } from '@/composables/usePermission';
 
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(productsApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(productsApi.list, { include: 'category' });
 const categories = ref([]);
 const suppliers = ref([]);
 const showModal = ref(false);
@@ -24,7 +24,7 @@ const saving = ref(false);
 const columns = [
     { key: 'name', label: 'Product', sortable: true },
     { key: 'sku', label: 'SKU', sortable: true },
-    { key: 'category_id', label: 'Category' },
+    { key: 'category', label: 'Category' },
 ];
 
 onMounted(() => {
@@ -82,11 +82,12 @@ async function remove(row) {
             <AppButton v-if="can('products.create')" @click="openCreate">Add Product</AppButton>
         </div>
         <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name or SKU" @page="goToPage" @search="setSearch" @sort="setSort">
+            <template #cell-category="{ row }">{{ row.category?.name ?? '—' }}</template>
             <template #actions="{ row }">
-                <div class="flex justify-end gap-2">
-                    <AppButton v-if="can('products.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
-                    <AppButton v-if="can('products.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
-                </div>
+                <AppButton v-if="can('products.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
+                <span v-else aria-hidden="true" />
+                <AppButton v-if="can('products.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
+                <span v-else aria-hidden="true" />
             </template>
         </DataTable>
         <Modal :open="showModal" :title="editing ? 'Edit Product' : 'Create Product'" size="lg" @close="showModal = false">
@@ -99,7 +100,7 @@ async function remove(row) {
                 </FormField>
                 <FormField v-model="form.supplier_id" label="Supplier" type="select">
                     <option value="">None</option>
-                    <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
+                    <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.company_name }}</option>
                 </FormField>
                 <div class="flex justify-end gap-2 pt-2">
                     <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>

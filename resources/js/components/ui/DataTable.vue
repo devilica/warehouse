@@ -78,7 +78,7 @@ function barClass(index) {
                             </slot>
                         </span>
                     </div>
-                    <div v-if="$slots.actions" class="mt-3 flex flex-wrap justify-end gap-2">
+                    <div v-if="$slots.actions" class="action-grid ml-auto mt-3">
                         <slot name="actions" :row="row" />
                     </div>
                 </article>
@@ -110,8 +110,11 @@ function barClass(index) {
                             <td v-for="(col, index) in columns" :key="col.key" class="px-4 py-3">
                                 <Skeleton class="h-4" :class="barClass(index)" />
                             </td>
-                            <td v-if="$slots.actions" class="px-4 py-3 text-right">
-                                <Skeleton class="ml-auto h-8 w-20" />
+                            <td v-if="$slots.actions" class="px-4 py-3">
+                                <div class="action-grid">
+                                    <Skeleton class="h-8 w-full" />
+                                    <Skeleton class="h-8 w-full" />
+                                </div>
                             </td>
                         </tr>
                     </template>
@@ -126,7 +129,7 @@ function barClass(index) {
                                 </slot>
                             </td>
                             <td v-if="$slots.actions" class="px-4 py-3">
-                                <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                                <div class="action-grid">
                                     <slot name="actions" :row="row" />
                                 </div>
                             </td>
@@ -144,3 +147,29 @@ function barClass(index) {
         </div>
     </div>
 </template>
+
+<style scoped>
+.action-grid {
+    display: grid;
+    width: 18rem;
+    margin-left: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-grid > :deep(*) {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.action-grid > :deep(button) {
+    min-height: 2.125rem;
+    box-sizing: border-box;
+}
+
+.action-grid > :deep(:only-child) {
+    grid-column: 2;
+}
+</style>

@@ -12,7 +12,7 @@ class GoodsReceipt extends Model
     
     protected $casts = ['old_values' => 'array', 'new_values' => 'array', 'confirmed_at' => 'datetime', 'approved_at' => 'datetime'];
 
-    protected $fillable = ['purchase_order_id', 'warehouse_id', 'status', 'confirmed_at', 'confirmed_by'];
+    protected $fillable = ['number', 'purchase_order_id', 'warehouse_id', 'status', 'received_by', 'received_at', 'notes', 'confirmed_at', 'confirmed_by'];
 
     public function purchaseOrder() { return $this->belongsTo(PurchaseOrder::class); }
     public function items() { return $this->hasMany(GoodsReceiptItem::class); }

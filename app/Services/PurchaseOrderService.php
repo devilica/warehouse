@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PurchaseOrder;
+use App\Support\DocumentNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -37,12 +38,21 @@ class PurchaseOrderService
             unset($data['items']);
 
             $order = PurchaseOrder::create(array_merge($data, [
+                'number' => $data['number'] ?? DocumentNumber::make('PO-'),
                 'status' => 'draft',
                 'created_by' => auth()->id(),
             ]));
 
             foreach ($items as $item) {
-                $order->items()->create($item);
+                $quantity = $item['quantity_ordered'] ?? $item['quantity'] ?? null;
+                if ($quantity === null) {
+                    throw ValidationException::withMessages(['items' => ['Each item needs a quantity.']]);
+                }
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity_ordered' => $quantity,
+                    'unit_price' => $item['unit_price'] ?? 0,
+                ]);
             }
 
             return $order->load(['supplier', 'items.product']);

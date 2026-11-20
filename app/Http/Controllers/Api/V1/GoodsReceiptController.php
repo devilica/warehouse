@@ -6,6 +6,7 @@ use App\Http\Requests\GoodsReceipt\StoreGoodsReceiptRequest;
 use App\Http\Resources\GoodsReceiptResource;
 use App\Models\GoodsReceipt;
 use App\Services\GoodsReceiptService;
+use App\Support\DocumentNumber;
 use Illuminate\Http\JsonResponse;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -34,7 +35,13 @@ class GoodsReceiptController extends ApiController
     public function store(StoreGoodsReceiptRequest $request): JsonResponse
     {
         $this->authorize('create', GoodsReceipt::class);
-        $receipt = GoodsReceipt::create($request->validated() + ['status' => 'draft']);
+        $data = $request->validated();
+        $receipt = GoodsReceipt::create([
+            'purchase_order_id' => $data['purchase_order_id'],
+            'warehouse_id' => $data['warehouse_id'],
+            'status' => 'draft',
+            'number' => DocumentNumber::make('GR-'),
+        ]);
         return $this->success(new GoodsReceiptResource($receipt), null, 201);
     }
 

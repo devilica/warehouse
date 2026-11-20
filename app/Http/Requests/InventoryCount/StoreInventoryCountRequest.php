@@ -11,5 +11,12 @@ class StoreInventoryCountRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array { return ['warehouse_id' => 'required|exists:warehouses,id', 'type' => 'required|in:full,partial', 'scheduled_at' => 'nullable|date']; }
+    public function rules(): array
+    {
+        return [
+            'warehouse_id' => ['required', 'exists:warehouses,id'],
+            'type' => ['nullable', 'in:full,partial'],
+            'scheduled_at' => ['nullable', 'date'],
+        ];
+    }
 }

@@ -76,10 +76,10 @@ async function remove(row) {
         </div>
         <DataTable :columns="columns" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
-                <div class="flex justify-end gap-2">
-                    <AppButton v-if="can('employees.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
-                    <AppButton v-if="can('employees.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
-                </div>
+                <AppButton v-if="can('employees.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
+                <span v-else aria-hidden="true" />
+                <AppButton v-if="can('employees.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
+                <span v-else aria-hidden="true" />
             </template>
         </DataTable>
         <Modal :open="showModal" :title="editing ? 'Edit Employee' : 'Create Employee'" @close="showModal = false">

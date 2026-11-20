@@ -11,5 +11,12 @@ class UpdateWarehouseRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array { return ['name' => 'sometimes|string', 'code' => 'sometimes|string|unique:warehouses,code,' . $this->route('warehouse')]; }
+    public function rules(): array
+    {
+        return [
+            'name' => 'sometimes|string',
+            'address' => 'nullable|string',
+            'capacity' => 'nullable|integer|min:0',
+        ];
+    }
 }

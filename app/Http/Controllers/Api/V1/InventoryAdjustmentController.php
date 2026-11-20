@@ -6,8 +6,10 @@ use App\Http\Requests\InventoryAdjustment\StoreInventoryAdjustmentRequest;
 use App\Http\Resources\InventoryAdjustmentResource;
 use App\Models\InventoryAdjustment;
 use App\Services\InventoryAdjustmentService;
+use App\Support\DocumentNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -37,11 +39,25 @@ class InventoryAdjustmentController extends ApiController
         $this->authorize('create', InventoryAdjustment::class);
         $adjustment = DB::transaction(function () use ($request) {
             $data = $request->validated();
-            $items = $data['items'];
+            $items = $data['items'] ?? [];
             unset($data['items']);
-            $adj = InventoryAdjustment::create($data + ['status' => 'pending']);
+            $adj = InventoryAdjustment::create($data + [
+                'status' => 'pending_approval',
+                'number' => DocumentNumber::make('ADJ-'),
+            ]);
             foreach ($items as $item) {
-                $adj->items()->create($item);
+                $locationId = $item['location_id'] ?? $item['warehouse_location_id'] ?? null;
+                $change = $item['quantity_change'] ?? $item['quantity_delta'] ?? null;
+                if (! $locationId || $change === null) {
+                    throw ValidationException::withMessages([
+                        'items' => ['Each adjustment item needs a location and a quantity change.'],
+                    ]);
+                }
+                $adj->items()->create([
+                    'product_id' => $item['product_id'],
+                    'location_id' => $locationId,
+                    'quantity_change' => $change,
+                ]);
             }
             return $adj->load('items.product');
         });

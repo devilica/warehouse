@@ -37,7 +37,7 @@ class InventoryCountService
                         $this->inventoryService->recordMovement([
                             'product_id' => $item->product_id,
                             'warehouse_id' => $count->warehouse_id,
-                            'warehouse_location_id' => $item->warehouse_location_id,
+                            'warehouse_location_id' => $item->location_id ?? $item->warehouse_location_id,
                             'quantity' => $variance,
                             'type' => 'count_adjustment',
                             'reference_type' => InventoryCount::class,

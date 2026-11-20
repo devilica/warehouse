@@ -119,7 +119,7 @@ The application was built in Cursor. The in-editor agent was used in passes, not
 3. Make the screens consistent. Row actions, modal footers, and report downloads were aligned to one button order and one set of styles, then checked in the browser.
 4. Write this guide from the project as it actually runs, including the limits below.
 
-Each pass was reviewed against the running app. Generated code that did not match a status rule or a screen was corrected rather than left as the model first wrote it.
+Each pass was reviewed against the running app. Generated code that did not match a status rule or a screen was corrected rather than left as the model first wrote it. That review caught an adjustment status split (`pending` against `pending_approval`) and a warehouse `code` rule for a column the table does not have.
 
 ## Architectural decisions
 
@@ -153,15 +153,14 @@ Automated checks are Pest tests, run with:
 php artisan test
 ```
 
-They cover sign-in and the current user ([tests/Feature/AuthTest.php](tests/Feature/AuthTest.php)), stock movements ([tests/Feature/InventoryServiceTest.php](tests/Feature/InventoryServiceTest.php) and [tests/Unit/InventoryServiceTest.php](tests/Unit/InventoryServiceTest.php)), dashboard order trends ([tests/Feature/DashboardOrderTrendsTest.php](tests/Feature/DashboardOrderTrendsTest.php)), product search and pagination ([tests/Feature/SearchTest.php](tests/Feature/SearchTest.php), [tests/Feature/ProductIndexTest.php](tests/Feature/ProductIndexTest.php)), purchase orders ([tests/Unit/PurchaseOrderServiceTest.php](tests/Unit/PurchaseOrderServiceTest.php), [tests/Feature/PurchaseOrderSendTest.php](tests/Feature/PurchaseOrderSendTest.php)), goods receipts ([tests/Unit/GoodsReceiptServiceTest.php](tests/Unit/GoodsReceiptServiceTest.php)), and password changes ([tests/Unit/AuthServiceTest.php](tests/Unit/AuthServiceTest.php)). [tests/Feature/ArchitectureTest.php](tests/Feature/ArchitectureTest.php) checks a missing `products.create` permission (403), a product edit in `activity_log`, a sixth login in the same minute (429), and the queued low-stock listener. Laravel Pint is available to format PHP.
+They cover sign-in and the current user ([tests/Feature/AuthTest.php](tests/Feature/AuthTest.php)), stock movements ([tests/Feature/InventoryServiceTest.php](tests/Feature/InventoryServiceTest.php) and [tests/Unit/InventoryServiceTest.php](tests/Unit/InventoryServiceTest.php)), dashboard order trends ([tests/Feature/DashboardOrderTrendsTest.php](tests/Feature/DashboardOrderTrendsTest.php)), product search and pagination ([tests/Feature/SearchTest.php](tests/Feature/SearchTest.php), [tests/Feature/ProductIndexTest.php](tests/Feature/ProductIndexTest.php)), purchase orders ([tests/Unit/PurchaseOrderServiceTest.php](tests/Unit/PurchaseOrderServiceTest.php), [tests/Feature/PurchaseOrderSendTest.php](tests/Feature/PurchaseOrderSendTest.php)), goods receipts ([tests/Unit/GoodsReceiptServiceTest.php](tests/Unit/GoodsReceiptServiceTest.php)), password changes ([tests/Unit/AuthServiceTest.php](tests/Unit/AuthServiceTest.php)), and approving an adjustment that is waiting for approval ([tests/Unit/InventoryAdjustmentServiceTest.php](tests/Unit/InventoryAdjustmentServiceTest.php)). [tests/Feature/ArchitectureTest.php](tests/Feature/ArchitectureTest.php) checks a missing `products.create` permission (403), a product edit in `activity_log`, a sixth login in the same minute (429), and the queued low-stock listener. Laravel Pint is available to format PHP.
 
 The main screens were also exercised in the browser after the seed and the button changes: sign-in, purchase orders, inventory counts, transfers, products, and reports. A button that the API would reject for the current status is not rendered.
 
 ## Known limitations
 
 - Product images, documents, and media rows store a path only. No file is uploaded, so those paths do not open a real document.
-- Some create forms and table columns still show a numeric id (supplier, warehouse) instead of a name.
-- Approving an adjustment requires status `pending`. Seeded adjustments use `pending_approval`, so the Approve button does not appear on those rows.
+- A goods receipt still asks for a purchase order number by id. Supplier, warehouse, product, and stock lists show names.
 - `php artisan db:show` needs the PHP `intl` extension. Without it, the command connects and then fails while formatting numbers.
 - Demo passwords are shared. Do not use them anywhere except a local demo.
 - Hosted MySQL that requires TLS needs `MYSQL_ATTR_SSL_CA`. Setting `DB_SSL=REQUIRED` has no effect.

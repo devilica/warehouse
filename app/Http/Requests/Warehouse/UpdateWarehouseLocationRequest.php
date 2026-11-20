@@ -15,7 +15,7 @@ class UpdateWarehouseLocationRequest extends FormRequest
     {
         return [
             'code' => 'sometimes|string',
-            'barcode' => 'nullable|string',
+            'name' => 'nullable|string',
         ];
     }
 }

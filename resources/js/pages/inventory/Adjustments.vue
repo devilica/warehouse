@@ -6,7 +6,8 @@ import Modal from '@/components/ui/Modal.vue';
 import FormField from '@/components/ui/FormField.vue';
 import AppButton from '@/components/ui/AppButton.vue';
 import Badge from '@/components/ui/Badge.vue';
-import { adjustmentsApi } from '@/api';
+import { adjustmentsApi, warehousesApi } from '@/api';
+import { unwrapPaginated } from '@/api/client';
 import { usePagination } from '@/composables/usePagination';
 import { useToastStore } from '@/stores/toast';
 import { usePermission } from '@/composables/usePermission';
@@ -15,12 +16,26 @@ const toast = useToastStore();
 const { can } = usePermission();
 const { items, meta, loading, params, load, goToPage, setSearch, setSort, setStatus } = usePagination(adjustmentsApi.list);
 const statuses = ['draft', 'pending_approval', 'approved', 'rejected', 'cancelled'];
+const warehouses = ref([]);
 const showModal = ref(false);
 const form = ref({ warehouse_id: '', reason: '' });
 
-onMounted(load);
+onMounted(() => {
+    load();
+    warehousesApi.list({ per_page: 100 }).then((res) => { warehouses.value = unwrapPaginated(res).data; });
+});
 async function create() { await adjustmentsApi.create(form.value); toast.success('Adjustment created'); showModal.value = false; await load(); }
-async function approve(row) { await adjustmentsApi.approve(row.id); toast.success('Approved'); await load(); }
+async function approve(row) {
+    try {
+        await adjustmentsApi.approve(row.id);
+        toast.success('Approved');
+        await load();
+    } catch (error) {
+        const errors = error.response?.data?.errors ?? {};
+        const message = errors.quantity?.[0] ?? errors.status?.[0] ?? error.response?.data?.message ?? 'Could not approve this adjustment';
+        toast.error(message);
+    }
+}
 </script>
 
 <template>
@@ -32,12 +47,15 @@ async function approve(row) { await adjustmentsApi.approve(row.id); toast.succes
         <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'status',label:'Status',sortable:true},{key:'reason',label:'Reason'}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" searchable search-placeholder="Search reason" @page="goToPage" @search="setSearch" @sort="setSort" @status="setStatus">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
-                <AppButton v-if="can('inventory-adjustments.approve') && row.status === 'pending'" size="sm" @click="approve(row)">Approve</AppButton>
+                <AppButton v-if="can('inventory-adjustments.approve') && row.status === 'pending_approval'" size="sm" @click="approve(row)">Approve</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Adjustment" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
-                <FormField v-model="form.warehouse_id" label="Warehouse ID" required />
+                <FormField v-model="form.warehouse_id" label="Warehouse" type="select" required>
+                    <option value="">Select a warehouse</option>
+                    <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">{{ warehouse.name }}</option>
+                </FormField>
                 <FormField v-model="form.reason" label="Reason" type="textarea" />
                 <div class="flex justify-end gap-2 pt-2">
                     <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>

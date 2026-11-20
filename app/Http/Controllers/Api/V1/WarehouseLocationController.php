@@ -22,20 +22,22 @@ class WarehouseLocationController extends ApiController
     public function store(StoreWarehouseLocationRequest $request, Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf): JsonResponse
     {
         $this->authorize('update', $warehouse);
-        $location = $shelf->locations()->create($request->validated());
+        $location = $shelf->locations()->create($request->validated() + [
+            'warehouse_id' => $shelf->zone->warehouse_id,
+        ]);
         return $this->success(new WarehouseLocationResource($location), null, 201);
     }
 
-    public function update(UpdateWarehouseLocationRequest $request, Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf, WarehouseLocation $location): JsonResponse
+    public function update(UpdateWarehouseLocationRequest $request, WarehouseLocation $location): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $location->shelf->zone->warehouse);
         $location->update($request->validated());
         return $this->success(new WarehouseLocationResource($location));
     }
 
-    public function destroy(Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf, WarehouseLocation $location): JsonResponse
+    public function destroy(WarehouseLocation $location): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $location->shelf->zone->warehouse);
         $location->delete();
         return $this->success(null, null, 204);
     }

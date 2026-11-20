@@ -27,6 +27,7 @@ const navGroups = computed(() => [
         title: 'People',
         items: [
             { name: 'Users', to: '/users', permission: 'users.view', icon: 'users' },
+            { name: 'Roles', to: '/roles', permission: 'roles.view', icon: 'tag' },
             { name: 'Employees', to: '/employees', permission: 'employees.view', icon: 'employees' },
         ],
     },
@@ -88,7 +89,7 @@ async function logout() {
 
 <template>
     <aside
-        class="fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col bg-[#12152c] text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
+        class="fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col bg-[#12152c] text-slate-300 transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0"
         :class="props.open ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'"
     >
         <div class="flex items-center gap-3 px-5 py-5">

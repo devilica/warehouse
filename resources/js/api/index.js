@@ -20,6 +20,8 @@ export const usersApi = {
 export const rolesApi = {
     list: () => api.get('/roles').then(unwrap),
     get: (id) => api.get(`/roles/${id}`).then(unwrap),
+    create: (payload) => api.post('/roles', payload).then(unwrap),
+    update: (id, payload) => api.put(`/roles/${id}`, payload).then(unwrap),
 };
 
 export const employeesApi = {
@@ -46,10 +48,16 @@ export const warehousesApi = {
     remove: (id) => api.delete(`/warehouses/${id}`),
     zones: (warehouseId, params) => api.get(`/warehouses/${warehouseId}/zones`, { params }),
     createZone: (warehouseId, payload) => api.post(`/warehouses/${warehouseId}/zones`, payload).then(unwrap),
+    updateZone: (id, payload) => api.put(`/zones/${id}`, payload).then(unwrap),
+    removeZone: (id) => api.delete(`/zones/${id}`),
     shelves: (warehouseId, zoneId, params) => api.get(`/warehouses/${warehouseId}/zones/${zoneId}/shelves`, { params }),
     createShelf: (warehouseId, zoneId, payload) => api.post(`/warehouses/${warehouseId}/zones/${zoneId}/shelves`, payload).then(unwrap),
+    updateShelf: (id, payload) => api.put(`/shelves/${id}`, payload).then(unwrap),
+    removeShelf: (id) => api.delete(`/shelves/${id}`),
     locations: (warehouseId, zoneId, shelfId, params) => api.get(`/warehouses/${warehouseId}/zones/${zoneId}/shelves/${shelfId}/locations`, { params }),
     createLocation: (warehouseId, zoneId, shelfId, payload) => api.post(`/warehouses/${warehouseId}/zones/${zoneId}/shelves/${shelfId}/locations`, payload).then(unwrap),
+    updateLocation: (id, payload) => api.put(`/locations/${id}`, payload).then(unwrap),
+    removeLocation: (id) => api.delete(`/locations/${id}`),
 };
 
 export const categoriesApi = {

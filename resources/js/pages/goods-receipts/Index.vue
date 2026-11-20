@@ -6,7 +6,8 @@ import Modal from '@/components/ui/Modal.vue';
 import FormField from '@/components/ui/FormField.vue';
 import AppButton from '@/components/ui/AppButton.vue';
 import Badge from '@/components/ui/Badge.vue';
-import { goodsReceiptsApi } from '@/api';
+import { goodsReceiptsApi, warehousesApi } from '@/api';
+import { unwrapPaginated } from '@/api/client';
 import { usePagination } from '@/composables/usePagination';
 import { useToastStore } from '@/stores/toast';
 import { usePermission } from '@/composables/usePermission';
@@ -15,10 +16,14 @@ const toast = useToastStore();
 const { can } = usePermission();
 const { items, meta, loading, params, load, goToPage, setSort, setStatus } = usePagination(goodsReceiptsApi.list);
 const statuses = ['draft', 'in_progress', 'confirmed', 'cancelled'];
+const warehouses = ref([]);
 const showModal = ref(false);
 const form = ref({ purchase_order_id: '', warehouse_id: '' });
 
-onMounted(load);
+onMounted(() => {
+    load();
+    warehousesApi.list({ per_page: 100 }).then((res) => { warehouses.value = unwrapPaginated(res).data; });
+});
 async function create() { await goodsReceiptsApi.create(form.value); toast.success('Receipt created'); showModal.value = false; await load(); }
 async function confirm(row) { await goodsReceiptsApi.confirm(row.id); toast.success('Receipt confirmed'); await load(); }
 </script>
@@ -38,7 +43,10 @@ async function confirm(row) { await goodsReceiptsApi.confirm(row.id); toast.succ
         <Modal :open="showModal" title="Create Goods Receipt" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.purchase_order_id" label="Purchase Order ID" required />
-                <FormField v-model="form.warehouse_id" label="Warehouse ID" required />
+                <FormField v-model="form.warehouse_id" label="Warehouse" type="select" required>
+                    <option value="">Select a warehouse</option>
+                    <option v-for="warehouse in warehouses" :key="warehouse.id" :value="warehouse.id">{{ warehouse.name }}</option>
+                </FormField>
                 <div class="flex justify-end gap-2 pt-2">
                     <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
                     <AppButton type="submit">Create</AppButton>

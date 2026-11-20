@@ -47,7 +47,10 @@ function openEdit(row) {
     showModal.value = true;
 }
 
+const demoAccount = (row) => row?.email === 'admin@wms.test';
+
 async function save() {
+    if (demoAccount(editing.value)) return;
     saving.value = true;
     errors.value = {};
     try {
@@ -71,6 +74,7 @@ async function save() {
 }
 
 async function remove(row) {
+    if (demoAccount(row)) return;
     if (!confirm(`Delete ${row.name}?`)) return;
     await usersApi.remove(row.id);
     toast.success('User deleted');
@@ -92,10 +96,10 @@ async function remove(row) {
                 <Badge variant="info">{{ row.roles?.[0] ?? '—' }}</Badge>
             </template>
             <template #actions="{ row }">
-                <div class="flex justify-end gap-2">
-                    <AppButton v-if="can('users.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
-                    <AppButton v-if="can('users.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
-                </div>
+                <AppButton v-if="can('users.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
+                <span v-else aria-hidden="true" />
+                    <AppButton v-if="can('users.delete')" size="sm" variant="danger" :disabled="demoAccount(row)" @click="remove(row)">Delete</AppButton>
+                <span v-else aria-hidden="true" />
             </template>
         </DataTable>
         <Modal :open="showModal" :title="editing ? 'Edit User' : 'Create User'" @close="showModal = false">
@@ -106,9 +110,10 @@ async function remove(row) {
                 <FormField v-model="form.role" label="Role" type="select" :error="errors.role?.[0]">
                     <option v-for="role in roles" :key="role.id" :value="role.name">{{ role.name }}</option>
                 </FormField>
+                <p v-if="demoAccount(editing)" class="text-sm text-amber-700">Not allowed on the demo account.</p>
                 <div class="flex justify-end gap-2 pt-2">
                     <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
-                    <AppButton type="submit" :loading="saving">Save</AppButton>
+                    <AppButton type="submit" :loading="saving" :disabled="demoAccount(editing)">Save</AppButton>
                 </div>
             </form>
         </Modal>

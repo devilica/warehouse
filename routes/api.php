@@ -37,7 +37,9 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('users', UserController::class);
         Route::put('users/{user}/roles', [RoleController::class, 'syncUserRoles']);
         Route::get('roles', [RoleController::class, 'index']);
+        Route::post('roles', [RoleController::class, 'store']);
         Route::get('roles/{role}', [RoleController::class, 'show']);
+        Route::put('roles/{role}', [RoleController::class, 'update']);
         Route::apiResource('employees', EmployeeController::class);
         Route::apiResource('suppliers', SupplierController::class);
         Route::apiResource('warehouses', WarehouseController::class);

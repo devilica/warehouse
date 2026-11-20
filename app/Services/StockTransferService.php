@@ -28,8 +28,8 @@ class StockTransferService
                 $this->inventoryService->recordMovement([
                     'product_id' => $item->product_id,
                     'warehouse_id' => $transfer->from_warehouse_id,
-                    'warehouse_location_id' => $item->from_warehouse_location_id,
-                    'quantity' => -abs($item->quantity),
+                    'warehouse_location_id' => $item->from_location_id ?? $item->from_warehouse_location_id,
+                    'quantity' => -abs((float) ($item->quantity_requested ?? $item->quantity ?? 0)),
                     'type' => 'transfer_out',
                     'reference_type' => StockTransfer::class,
                     'reference_id' => $transfer->id,
@@ -51,8 +51,8 @@ class StockTransferService
                 $this->inventoryService->recordMovement([
                     'product_id' => $item->product_id,
                     'warehouse_id' => $transfer->to_warehouse_id,
-                    'warehouse_location_id' => $item->to_warehouse_location_id,
-                    'quantity' => abs($item->quantity),
+                    'warehouse_location_id' => $item->to_location_id ?? $item->to_warehouse_location_id,
+                    'quantity' => abs((float) ($item->quantity_requested ?? $item->quantity ?? 0)),
                     'type' => 'transfer_in',
                     'reference_type' => StockTransfer::class,
                     'reference_id' => $transfer->id,

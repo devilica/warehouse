@@ -7,7 +7,8 @@ import Modal from '@/components/ui/Modal.vue';
 import FormField from '@/components/ui/FormField.vue';
 import AppButton from '@/components/ui/AppButton.vue';
 import Badge from '@/components/ui/Badge.vue';
-import { purchaseOrdersApi } from '@/api';
+import { purchaseOrdersApi, suppliersApi } from '@/api';
+import { unwrapPaginated } from '@/api/client';
 import { usePagination } from '@/composables/usePagination';
 import { useToastStore } from '@/stores/toast';
 import { usePermission } from '@/composables/usePermission';
@@ -15,12 +16,16 @@ import { usePermission } from '@/composables/usePermission';
 const router = useRouter();
 const toast = useToastStore();
 const { can } = usePermission();
-const { items, meta, loading, params, load, goToPage, setSearch, setSort, setStatus } = usePagination(purchaseOrdersApi.list);
+const { items, meta, loading, params, load, goToPage, setSearch, setSort, setStatus } = usePagination(purchaseOrdersApi.list, { include: 'supplier' });
+const suppliers = ref([]);
 const statuses = ['draft', 'sent', 'partially_received', 'received', 'closed', 'cancelled'];
 const showModal = ref(false);
 const form = ref({ supplier_id: '', expected_delivery_date: '' });
 
-onMounted(load);
+onMounted(() => {
+    load();
+    suppliersApi.list({ per_page: 100 }).then((res) => { suppliers.value = unwrapPaginated(res).data; });
+});
 
 async function create() {
     await purchaseOrdersApi.create(form.value);
@@ -39,17 +44,22 @@ async function close(row) { await purchaseOrdersApi.close(row.id); toast.success
             <div><h1 class="text-2xl font-bold">Purchase Orders</h1></div>
             <AppButton v-if="can('purchase-orders.create')" @click="showModal = true">Create PO</AppButton>
         </div>
-        <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'number',label:'Number',sortable:true},{key:'status',label:'Status',sortable:true},{key:'supplier_id',label:'Supplier'}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" searchable search-placeholder="Search order number" @page="goToPage" @search="setSearch" @sort="setSort" @status="setStatus">
+        <DataTable :columns="[{key:'id',label:'#',sortable:true},{key:'number',label:'Number',sortable:true},{key:'status',label:'Status',sortable:true},{key:'supplier',label:'Supplier'}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" :statuses="statuses" searchable search-placeholder="Search order number" @page="goToPage" @search="setSearch" @sort="setSort" @status="setStatus">
             <template #cell-status="{ row }"><Badge variant="info">{{ row.status }}</Badge></template>
+            <template #cell-supplier="{ row }">{{ row.supplier?.company_name ?? '—' }}</template>
             <template #actions="{ row }">
-                <AppButton size="sm" variant="secondary" @click="router.push(`/purchase-orders/${row.id}`)">View</AppButton>
                 <AppButton v-if="can('purchase-orders.update') && row.status === 'draft'" size="sm" @click="send(row)">Send</AppButton>
-                <AppButton v-if="can('purchase-orders.update') && ['sent', 'partially_received'].includes(row.status)" size="sm" @click="close(row)">Close</AppButton>
+                <AppButton v-else-if="can('purchase-orders.update') && ['sent', 'partially_received'].includes(row.status)" size="sm" @click="close(row)">Close</AppButton>
+                <span v-else aria-hidden="true" />
+                <AppButton size="sm" variant="secondary" @click="router.push(`/purchase-orders/${row.id}`)">View</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Purchase Order" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
-                <FormField v-model="form.supplier_id" label="Supplier ID" required />
+                <FormField v-model="form.supplier_id" label="Supplier" type="select" required>
+                    <option value="">Select a supplier</option>
+                    <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.company_name }}</option>
+                </FormField>
                 <FormField v-model="form.expected_delivery_date" label="Expected Delivery" type="date" />
                 <div class="flex justify-end gap-2 pt-2">
                     <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>

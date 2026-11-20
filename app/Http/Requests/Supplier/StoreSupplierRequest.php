@@ -11,5 +11,12 @@ class StoreSupplierRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array { return ['name' => 'required|string', 'code' => 'required|string|unique:suppliers', 'email' => 'nullable|email']; }
+    public function rules(): array
+    {
+        return [
+            'company_name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+            'phone' => ['nullable', 'string', 'max:255'],
+        ];
+    }
 }

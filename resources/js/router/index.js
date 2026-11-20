@@ -5,6 +5,7 @@ const routes = [
     { path: '/login', name: 'login', component: () => import('@/pages/auth/Login.vue'), meta: { guest: true } },
     { path: '/', name: 'dashboard', component: () => import('@/pages/Dashboard.vue'), meta: { auth: true } },
     { path: '/users', component: () => import('@/pages/users/Index.vue'), meta: { auth: true, permission: 'users.view' } },
+    { path: '/roles', component: () => import('@/pages/roles/Index.vue'), meta: { auth: true, permission: 'roles.view' } },
     { path: '/employees', component: () => import('@/pages/employees/Index.vue'), meta: { auth: true, permission: 'employees.view' } },
     { path: '/warehouses', component: () => import('@/pages/warehouses/Index.vue'), meta: { auth: true, permission: 'warehouses.view' } },
     { path: '/warehouses/:id', component: () => import('@/pages/warehouses/Show.vue'), meta: { auth: true, permission: 'warehouses.view' } },

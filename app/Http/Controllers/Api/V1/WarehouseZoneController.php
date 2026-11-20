@@ -30,16 +30,16 @@ class WarehouseZoneController extends ApiController
         return $this->success(new WarehouseZoneResource($zone->load('shelves')));
     }
 
-    public function update(UpdateWarehouseZoneRequest $request, Warehouse $warehouse, WarehouseZone $zone): JsonResponse
+    public function update(UpdateWarehouseZoneRequest $request, WarehouseZone $zone): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $zone->warehouse);
         $zone->update($request->validated());
         return $this->success(new WarehouseZoneResource($zone));
     }
 
-    public function destroy(Warehouse $warehouse, WarehouseZone $zone): JsonResponse
+    public function destroy(WarehouseZone $zone): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $zone->warehouse);
         $zone->delete();
         return $this->success(null, null, 204);
     }

@@ -25,16 +25,16 @@ class WarehouseShelfController extends ApiController
         return $this->success(new WarehouseShelfResource($shelf), null, 201);
     }
 
-    public function update(UpdateWarehouseShelfRequest $request, Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf): JsonResponse
+    public function update(UpdateWarehouseShelfRequest $request, WarehouseShelf $shelf): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $shelf->zone->warehouse);
         $shelf->update($request->validated());
         return $this->success(new WarehouseShelfResource($shelf));
     }
 
-    public function destroy(Warehouse $warehouse, WarehouseZone $zone, WarehouseShelf $shelf): JsonResponse
+    public function destroy(WarehouseShelf $shelf): JsonResponse
     {
-        $this->authorize('update', $warehouse);
+        $this->authorize('update', $shelf->zone->warehouse);
         $shelf->delete();
         return $this->success(null, null, 204);
     }

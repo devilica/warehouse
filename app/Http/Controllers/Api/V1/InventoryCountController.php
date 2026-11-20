@@ -6,6 +6,7 @@ use App\Http\Requests\InventoryCount\StoreInventoryCountRequest;
 use App\Http\Resources\InventoryCountResource;
 use App\Models\InventoryCount;
 use App\Services\InventoryCountService;
+use App\Support\DocumentNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -29,13 +30,20 @@ class InventoryCountController extends ApiController
     public function show(InventoryCount $inventoryCount): JsonResponse
     {
         $this->authorize('view', $inventoryCount);
-        return $this->success(new InventoryCountResource($inventoryCount->load('items.product')));
+        return $this->success(new InventoryCountResource($inventoryCount->load(['warehouse', 'items.product', 'items.location'])));
     }
 
     public function store(StoreInventoryCountRequest $request): JsonResponse
     {
         $this->authorize('create', InventoryCount::class);
-        $count = InventoryCount::create($request->validated() + ['status' => 'scheduled']);
+        $data = $request->validated();
+        $count = InventoryCount::create([
+            'warehouse_id' => $data['warehouse_id'],
+            'type' => $data['type'] ?? 'full',
+            'scheduled_at' => $data['scheduled_at'] ?? null,
+            'status' => 'scheduled',
+            'number' => DocumentNumber::make('CNT-'),
+        ]);
         return $this->success(new InventoryCountResource($count), null, 201);
     }
 

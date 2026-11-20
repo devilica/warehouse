@@ -15,13 +15,13 @@ const { can } = usePermission();
 const { items, meta, loading, params, load, goToPage, setSearch, setSort } = usePagination(suppliersApi.list);
 const showModal = ref(false);
 const editing = ref(null);
-const form = ref({ name: '', email: '', phone: '' });
+const form = ref({ company_name: '', email: '', phone: '' });
 const saving = ref(false);
 
 onMounted(load);
 
-function openCreate() { editing.value = null; form.value = { name: '', email: '', phone: '' }; showModal.value = true; }
-function openEdit(row) { editing.value = row; form.value = { name: row.name, email: row.email ?? '', phone: row.phone ?? '' }; showModal.value = true; }
+function openCreate() { editing.value = null; form.value = { company_name: '', email: '', phone: '' }; showModal.value = true; }
+function openEdit(row) { editing.value = row; form.value = { company_name: row.company_name ?? '', email: row.email ?? '', phone: row.phone ?? '' }; showModal.value = true; }
 
 async function save() {
     saving.value = true;
@@ -47,12 +47,14 @@ async function remove(row) { if (!confirm('Delete?')) return; await suppliersApi
         <DataTable :columns="[{key:'company_name',label:'Name',sortable:true},{key:'email',label:'Email',sortable:true},{key:'phone',label:'Phone',sortable:true}]" :rows="items" :loading="loading" :meta="meta" :sort="params.sort" searchable search-placeholder="Search name or email" @page="goToPage" @search="setSearch" @sort="setSort">
             <template #actions="{ row }">
                 <AppButton v-if="can('suppliers.update')" size="sm" variant="secondary" @click="openEdit(row)">Edit</AppButton>
+                <span v-else aria-hidden="true" />
                 <AppButton v-if="can('suppliers.delete')" size="sm" variant="danger" @click="remove(row)">Delete</AppButton>
+                <span v-else aria-hidden="true" />
             </template>
         </DataTable>
         <Modal :open="showModal" title="Supplier" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="save">
-                <FormField v-model="form.name" label="Name" required />
+                <FormField v-model="form.company_name" label="Name" required />
                 <FormField v-model="form.email" label="Email" type="email" />
                 <FormField v-model="form.phone" label="Phone" />
                 <div class="flex justify-end gap-2 pt-2">

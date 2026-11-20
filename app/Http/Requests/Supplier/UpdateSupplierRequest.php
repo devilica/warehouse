@@ -11,5 +11,12 @@ class UpdateSupplierRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array { return ['name' => 'sometimes|string', 'code' => 'sometimes|string|unique:suppliers,code,' . $this->route('supplier'), 'email' => 'nullable|email']; }
+    public function rules(): array
+    {
+        return [
+            'company_name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+            'phone' => ['nullable', 'string', 'max:255'],
+        ];
+    }
 }

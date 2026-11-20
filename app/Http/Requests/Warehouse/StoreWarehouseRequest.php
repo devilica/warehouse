@@ -11,5 +11,12 @@ class StoreWarehouseRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array { return ['name' => 'required|string', 'code' => 'required|string|unique:warehouses']; }
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string',
+            'address' => 'nullable|string',
+            'capacity' => 'nullable|integer|min:0',
+        ];
+    }
 }

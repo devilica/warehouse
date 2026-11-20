@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\Warehouse\StoreWarehouseRequest;
+use App\Http\Requests\Warehouse\UpdateWarehouseRequest;
 use App\Http\Resources\WarehouseResource;
 use App\Models\Warehouse;
 use Illuminate\Http\JsonResponse;
@@ -29,14 +31,14 @@ class WarehouseController extends ApiController
         return $this->success(new WarehouseResource($warehouse->loadMissing([])));
     }
     
-    public function store(Warehouse\StoreWarehouseRequest $request): JsonResponse
+    public function store(StoreWarehouseRequest $request): JsonResponse
     {
         $this->authorize('create', Warehouse::class);
         $model = Warehouse::create($request->validated());
         return $this->success(new WarehouseResource($model), null, 201);
     }
     
-    public function update(Warehouse\UpdateWarehouseRequest $request, Warehouse $warehouse): JsonResponse
+    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse): JsonResponse
     {
         $this->authorize('update', $warehouse);
         $warehouse->update($request->validated());
