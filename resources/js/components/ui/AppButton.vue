@@ -3,6 +3,7 @@ defineProps({
     variant: { type: String, default: 'primary' },
     size: { type: String, default: 'md' },
     loading: { type: Boolean, default: false },
+    disabled: { type: Boolean, default: false },
     type: { type: String, default: 'button' },
 });
 </script>
@@ -10,7 +11,7 @@ defineProps({
 <template>
     <button
         :type="type"
-        :disabled="loading"
+        :disabled="disabled || loading"
         class="inline-flex items-center justify-center gap-2 rounded-xl font-medium transition focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:opacity-60"
         :class="{
             'bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm': variant === 'primary',

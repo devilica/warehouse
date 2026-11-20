@@ -43,14 +43,17 @@ async function close(row) { await purchaseOrdersApi.close(row.id); toast.success
             <template #actions="{ row }">
                 <AppButton size="sm" variant="secondary" @click="router.push(`/purchase-orders/${row.id}`)">View</AppButton>
                 <AppButton v-if="can('purchase-orders.update') && row.status === 'draft'" size="sm" @click="send(row)">Send</AppButton>
-                <AppButton v-if="can('purchase-orders.update')" size="sm" variant="ghost" @click="close(row)">Close</AppButton>
+                <AppButton v-if="can('purchase-orders.update') && ['sent', 'partially_received'].includes(row.status)" size="sm" @click="close(row)">Close</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Purchase Order" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.supplier_id" label="Supplier ID" required />
                 <FormField v-model="form.expected_delivery_date" label="Expected Delivery" type="date" />
-                <AppButton type="submit">Create</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit">Create</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

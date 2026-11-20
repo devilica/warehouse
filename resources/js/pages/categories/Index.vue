@@ -53,7 +53,10 @@ async function remove(row) { if (!confirm('Delete?')) return; await categoriesAp
             <form class="space-y-4" @submit.prevent="save">
                 <FormField v-model="form.name" label="Name" required />
                 <FormField v-model="form.code" label="Code" />
-                <AppButton type="submit" :loading="saving">Save</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit" :loading="saving">Save</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

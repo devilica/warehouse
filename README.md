@@ -4,80 +4,77 @@ Full-stack warehouse management application for inventory, procurement, and staf
 
 **Laravel 12** · **Vue 3** · **PHP 8.2+**
 
-## About
+## Concept
 
-Warehouse CMS is a single-page admin application backed by a REST API. It covers day-to-day warehouse workflows: tracking stock across locations, managing purchase orders and goods receipts, running inventory counts and adjustments, and controlling access with role-based permissions.
+Warehouse CMS is a single-company admin for the people who run a warehouse. Staff use one Vue application. That application talks to one Laravel API, which records stock, purchasing, and who is allowed to do what.
+
+The product is organized around a working day, not around empty tables:
+
+- See whether stock is healthy, low, or gone, and how purchasing has moved over time.
+- Keep a catalog of products, categories, and suppliers, stored across warehouses, zones, shelves, and locations.
+- Move stock with adjustments, transfers, and cycle counts.
+- Buy stock through purchase orders and confirm it with goods receipts.
+- Sign in as a person with a role, and only see the actions that role allows.
+
+The seeded demo is meant to look occupied: lists have multiple pages of realistic rows, and the dashboard has numbers, a trend, and recent activity.
 
 ### Features
 
-- **Dashboard** — KPI cards (stock value, low stock, pending POs) and procurement trends chart
-- **Catalog** — Products, categories, suppliers, barcode support
-- **Warehouses** — Multi-warehouse setup with zones, shelves, and locations
-- **Inventory** — Stock levels, transactions, adjustments, transfers, cycle counts
-- **Procurement** — Purchase orders and goods receipts
-- **People** — Users, employees, roles and permissions (Spatie)
-- **System** — PDF/Excel reports, audit log, notifications
+- **Dashboard** — stock value, low stock, out of stock, pending purchase orders, and a procurement trend
+- **Catalog** — products, nested categories, suppliers, and barcodes
+- **Warehouses** — several warehouses, each with zones, shelves, and locations
+- **Inventory** — stock levels, movements, adjustments, transfers, and cycle counts
+- **Procurement** — purchase orders and goods receipts
+- **People** — users, employees, and roles (Spatie Permission)
+- **System** — PDF, Excel, and CSV reports, an audit log, and notifications
 
-## Tech Stack
+## Getting started
 
-| Layer | Stack |
-|-------|-------|
-| Backend | Laravel 12, Sanctum, Spatie Permission & Query Builder, Activity Log |
-| Frontend | Vue 3, Vue Router, Pinia, Tailwind CSS 4, Vite, ApexCharts |
-| Database | MySQL (production) or SQLite (local default) |
+### Requirements
 
-## Requirements
-
-- PHP **8.2+** with extensions: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`
+- PHP **8.2+** with `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, and `bcmath`
 - Composer 2.x
 - Node.js **18+** and npm
-- MySQL 8+ (optional — SQLite works out of the box for a quick start)
+- MySQL 8+ if you are not using SQLite
 
-## Installation
-
-### 1. Clone the repository
+### Install
 
 ```bash
 git clone https://github.com/devilica/warehouse.git
 cd warehouse
-```
-
-### 2. Install PHP dependencies and configure environment
-
-```bash
 composer install
 cp .env.example .env          # Windows: copy .env.example .env
 php artisan key:generate
 ```
 
-### 3. Set up the database
+### Database
 
-**SQLite (easiest for local development)**
-
-Ensure `.env` contains:
+SQLite is the fastest local setup. In `.env`:
 
 ```
 DB_CONNECTION=sqlite
 ```
 
-Then create the database file and run migrations with seed data:
+Then:
 
 ```bash
 touch database/database.sqlite   # Windows: type nul > database\database.sqlite
 php artisan migrate --seed
 ```
 
-**MySQL**
+For MySQL, set `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`, create the database, and run the same `php artisan migrate --seed`. TLS is configured with `MYSQL_ATTR_SSL_CA` pointing at a CA file. `DB_SSL` is not read by Laravel.
 
-Update the `DB_*` variables in `.env`, create the database, then run:
+`migrate --seed` creates roles, the admin accounts, and demo operations data. To add more demo rows later without deleting what is already there:
 
 ```bash
-php artisan migrate --seed
+php artisan db:seed --class=DemoDataSeeder
 ```
 
-### 4. Install frontend dependencies and run
+The seeder tops each business table up to a target count. It does not wipe users or re-run from an empty database.
 
-**Option A — two terminals**
+### Run
+
+Two terminals:
 
 ```bash
 npm install
@@ -85,55 +82,97 @@ npm run dev          # terminal 1
 php artisan serve    # terminal 2
 ```
 
-**Option B — all-in-one dev script**
+Or everything in one process (server, queue, logs, and Vite):
 
 ```bash
-npm install
 composer dev
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-### Quick setup (alternative)
+On Windows, `php artisan serve` loads [bootstrap/dev-router.php](bootstrap/dev-router.php) so the built-in server finds `public/index.php`. That file is part of the repo.
 
-If you prefer a single command after cloning:
+With a remote database such as Aiven, local speed depends mostly on PHP itself:
 
-```bash
-composer setup
-php artisan db:seed
-npm run dev
-```
+- Enable OPcache in `php.ini` (`zend_extension=opcache`, `opcache.enable=1`, `opcache.enable_cli=1`). Without it, every request recompiles Laravel, which takes about half a second.
+- Set `DB_PERSISTENT=true` so the built-in server reuses one TLS connection instead of opening a new one for each request.
+- Keep `SESSION_DRIVER=file` and `CACHE_STORE=file`, so sessions and cache are not stored in the remote database.
 
-## Default Login
-
-After seeding, use these accounts:
+### Sign in
 
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | `admin@wms.test` | `password` |
 | Warehouse Manager | `manager@wms.test` | `password` |
 
-`php artisan migrate --seed` loads roles, sample catalog/warehouse data, and demo inventory and purchase order records via `DemoDataSeeder`.
+Extra staff accounts created by the demo seeder use the same password. These accounts are for a local demo only.
 
-## Useful Commands
+## AI tools and development process
+
+The application was built in Cursor. The in-editor agent was used in passes, not as a single generation:
+
+1. Scaffold the API. Generators in [scripts/](scripts/) wrote services, controllers, and related classes from a repeated shape, then those files were kept under version control and edited by hand where the workflow needed real rules.
+2. Make the demo look lived-in. `DemoDataSeeder` was changed so a second run fills tables up to a target instead of stopping at the first row.
+3. Make the screens consistent. Row actions, modal footers, and report downloads were aligned to one button order and one set of styles, then checked in the browser.
+4. Write this guide from the project as it actually runs, including the limits below.
+
+Each pass was reviewed against the running app. Generated code that did not match a status rule or a screen was corrected rather than left as the model first wrote it.
+
+## Architectural decisions
+
+The UI is a Vue 3 single-page app (Vue Router, Pinia, Tailwind CSS, Vite). It calls `/api/v1` with a Sanctum bearer token stored in the browser.
+
+Controllers stay thin. A status change such as sending a purchase order or shipping a transfer is decided in a service, for example [app/Services/PurchaseOrderService.php](app/Services/PurchaseOrderService.php), [app/Services/StockTransferService.php](app/Services/StockTransferService.php), and [app/Services/InventoryService.php](app/Services/InventoryService.php). The service checks the current status and records the stock movement. The screen only shows the button when that same status applies.
+
+Access has two layers. Spatie roles decide which permission a person has. Laravel policies enforce that permission on the model. List endpoints use Spatie Query Builder for filters and includes. Product categories use a nested set so a category can sit under a parent.
+
+The dashboard reads aggregate queries and caches them briefly. The demo seeder clears that cache after it writes, so the first load shows the new numbers.
+
+## Quality assurance
+
+Automated checks are Pest tests, run with:
+
+```bash
+php artisan test
+```
+
+They cover sign-in and the current user ([tests/Feature/AuthTest.php](tests/Feature/AuthTest.php)), stock movements ([tests/Feature/InventoryServiceTest.php](tests/Feature/InventoryServiceTest.php) and [tests/Unit/InventoryServiceTest.php](tests/Unit/InventoryServiceTest.php)), and dashboard order trends ([tests/Feature/DashboardOrderTrendsTest.php](tests/Feature/DashboardOrderTrendsTest.php)). Laravel Pint is available to format PHP.
+
+The main screens were also exercised in the browser after the seed and the button changes: sign-in, purchase orders, inventory counts, transfers, products, and reports. A button that the API would reject for the current status is not rendered.
+
+## Known limitations
+
+- Product images, documents, and media rows store a path only. No file is uploaded, so those paths do not open a real document.
+- Some create forms and table columns still show a numeric id (supplier, warehouse) instead of a name.
+- Approving an adjustment requires status `pending`. Seeded adjustments use `pending_approval`, so the Approve button does not appear on those rows.
+- Some list responses do not include pagination meta, so the table stays on the first page even when more rows exist. `per_page` still limits what the API returns.
+- `php artisan db:show` needs the PHP `intl` extension. Without it, the command connects and then fails while formatting numbers.
+- Demo passwords are shared. Do not use them anywhere except a local demo.
+- Hosted MySQL that requires TLS needs `MYSQL_ATTR_SSL_CA`. Setting `DB_SSL=REQUIRED` has no effect.
+- PHP's built-in server on Windows handles one request at a time (`PHP_CLI_SERVER_WORKERS` is not supported there). The dashboard's parallel API calls therefore run one after another locally.
+- Each query to the Aiven database (Amsterdam) costs one network round trip, about 60–70 ms from the Balkans. The app and the database should run in the same region.
+
+## Tech stack
+
+| Layer | Stack |
+|-------|-------|
+| Backend | Laravel 12, Sanctum, Spatie Permission, Query Builder, and Activity Log |
+| Frontend | Vue 3, Vue Router, Pinia, Tailwind CSS 4, Vite, ApexCharts |
+| Documents | DomPDF, Maatwebsite Excel, Picqer barcode generator |
+| Database | SQLite locally, or MySQL 8 |
+
+## Useful commands
 
 | Command | Description |
 |---------|-------------|
-| `composer dev` | Run Laravel server, queue worker, logs, and Vite together |
-| `php artisan test` | Run the test suite |
-| `npm run build` | Build frontend assets for production |
-| `php artisan db:seed --class=DemoDataSeeder` | Re-seed demo data (skips if purchase orders already exist) |
+| `composer dev` | Laravel server, queue worker, logs, and Vite together |
+| `php artisan test` | Pest test suite |
+| `npm run build` | Production frontend build |
+| `php artisan db:seed --class=DemoDataSeeder` | Top up demo data without deleting existing rows |
 
 ## Deployment (Vercel)
 
-This project includes a [`vercel.json`](vercel.json) configuration for serverless deployment. Set at minimum:
-
-- `APP_KEY` (copy from local `.env`)
-- `APP_URL` (your Vercel domain)
-- `DB_*` connection variables for MySQL
-- `CACHE_STORE=array`
-
-Run migrations against the production database before going live.
+[vercel.json](vercel.json) is set up for a serverless frontend build. Before a hosted deploy, set `APP_KEY`, `APP_URL`, the `DB_*` MySQL settings, and `CACHE_STORE=array`, then run migrations against that database. The function region is set to `fra1` (Frankfurt) to sit close to the Aiven database in Amsterdam; change `regions` if the database moves. `DB_PERSISTENT=true` lets a warm function reuse its database connection.
 
 ## License
 

@@ -6,7 +6,6 @@ use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\StockLevel;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -87,31 +86,16 @@ class DashboardService
             ? now()->subMonths(11)->startOfMonth()
             : now()->subDays(29)->startOfDay();
 
+        $bucket = $this->trendBucketExpression($period);
+
         $rows = DB::table('purchase_order_items')
             ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
             ->where('purchase_orders.created_at', '>=', $start)
             ->whereNot('purchase_orders.status', 'draft')
-            ->select(
-                'purchase_orders.id as purchase_order_id',
-                'purchase_orders.created_at',
-                'purchase_order_items.quantity_ordered'
-            )
-            ->get();
-
-        $buckets = [];
-
-        foreach ($rows as $row) {
-            $key = $period === 'month'
-                ? Carbon::parse($row->created_at)->format('Y-m')
-                : Carbon::parse($row->created_at)->format('Y-m-d');
-
-            if (! isset($buckets[$key])) {
-                $buckets[$key] = ['units' => 0, 'orders' => []];
-            }
-
-            $buckets[$key]['units'] += (float) $row->quantity_ordered;
-            $buckets[$key]['orders'][$row->purchase_order_id] = true;
-        }
+            ->selectRaw("{$bucket} as bucket, SUM(purchase_order_items.quantity_ordered) as units, COUNT(DISTINCT purchase_orders.id) as orders")
+            ->groupByRaw($bucket)
+            ->get()
+            ->keyBy('bucket');
 
         $labels = [];
         $unitsOrdered = [];
@@ -120,18 +104,18 @@ class DashboardService
         if ($period === 'month') {
             for ($i = 11; $i >= 0; $i--) {
                 $date = now()->subMonths($i)->startOfMonth();
-                $key = $date->format('Y-m');
+                $row = $rows->get($date->format('Y-m'));
                 $labels[] = $date->format('M Y');
-                $unitsOrdered[] = (int) round($buckets[$key]['units'] ?? 0);
-                $orderCount[] = isset($buckets[$key]) ? count($buckets[$key]['orders']) : 0;
+                $unitsOrdered[] = (int) round($row->units ?? 0);
+                $orderCount[] = (int) ($row->orders ?? 0);
             }
         } else {
             for ($i = 29; $i >= 0; $i--) {
                 $date = now()->subDays($i)->startOfDay();
-                $key = $date->format('Y-m-d');
+                $row = $rows->get($date->format('Y-m-d'));
                 $labels[] = $date->format('M j');
-                $unitsOrdered[] = (int) round($buckets[$key]['units'] ?? 0);
-                $orderCount[] = isset($buckets[$key]) ? count($buckets[$key]['orders']) : 0;
+                $unitsOrdered[] = (int) round($row->units ?? 0);
+                $orderCount[] = (int) ($row->orders ?? 0);
             }
         }
 
@@ -145,5 +129,24 @@ class DashboardService
                 'orders' => array_sum($orderCount),
             ],
         ];
+    }
+
+    private function trendBucketExpression(string $period): string
+    {
+        $driver = DB::connection()->getDriverName();
+
+        if ($period === 'month') {
+            return match ($driver) {
+                'sqlite' => "strftime('%Y-%m', purchase_orders.created_at)",
+                'pgsql' => "to_char(purchase_orders.created_at, 'YYYY-MM')",
+                default => "DATE_FORMAT(purchase_orders.created_at, '%Y-%m')",
+            };
+        }
+
+        return match ($driver) {
+            'sqlite' => "strftime('%Y-%m-%d', purchase_orders.created_at)",
+            'pgsql' => "to_char(purchase_orders.created_at, 'YYYY-MM-DD')",
+            default => 'DATE(purchase_orders.created_at)',
+        };
     }
 }

@@ -35,14 +35,17 @@ async function finalize(row) { await countsApi.finalize(row.id); toast.success('
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
                 <AppButton size="sm" variant="secondary" @click="router.push(`/inventory/counts/${row.id}`)">View</AppButton>
-                <AppButton v-if="can('inventory-counts.start')" size="sm" @click="start(row)">Start</AppButton>
-                <AppButton v-if="can('inventory-counts.finalize')" size="sm" @click="finalize(row)">Finalize</AppButton>
+                <AppButton v-if="can('inventory-counts.start') && row.status === 'scheduled'" size="sm" @click="start(row)">Start</AppButton>
+                <AppButton v-if="can('inventory-counts.finalize') && row.status === 'in_progress'" size="sm" @click="finalize(row)">Finalize</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Inventory Count" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.warehouse_id" label="Warehouse ID" required />
-                <AppButton type="submit">Create</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit">Create</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

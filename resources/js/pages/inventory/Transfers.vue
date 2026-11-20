@@ -34,17 +34,20 @@ async function action(fn, row, msg) { await fn(row.id); toast.success(msg); awai
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
                 <AppButton size="sm" variant="secondary" @click="router.push(`/inventory/transfers/${row.id}`)">View</AppButton>
-                <AppButton v-if="can('stock-transfers.update')" size="sm" @click="action(transfersApi.approve, row, 'Approved')">Approve</AppButton>
-                <AppButton v-if="can('stock-transfers.update')" size="sm" @click="action(transfersApi.ship, row, 'Shipped')">Ship</AppButton>
-                <AppButton v-if="can('stock-transfers.update')" size="sm" @click="action(transfersApi.receive, row, 'Received')">Receive</AppButton>
-                <AppButton v-if="can('stock-transfers.update')" size="sm" @click="action(transfersApi.complete, row, 'Completed')">Complete</AppButton>
+                <AppButton v-if="can('stock-transfers.update') && row.status === 'draft'" size="sm" @click="action(transfersApi.approve, row, 'Approved')">Approve</AppButton>
+                <AppButton v-if="can('stock-transfers.update') && row.status === 'approved'" size="sm" @click="action(transfersApi.ship, row, 'Shipped')">Ship</AppButton>
+                <AppButton v-if="can('stock-transfers.update') && row.status === 'shipped'" size="sm" @click="action(transfersApi.receive, row, 'Received')">Receive</AppButton>
+                <AppButton v-if="can('stock-transfers.update') && row.status === 'received'" size="sm" @click="action(transfersApi.complete, row, 'Completed')">Complete</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Transfer" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.from_warehouse_id" label="From Warehouse ID" required />
                 <FormField v-model="form.to_warehouse_id" label="To Warehouse ID" required />
-                <AppButton type="submit">Create</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit">Create</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

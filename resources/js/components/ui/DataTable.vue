@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import AppButton from '@/components/ui/AppButton.vue';
 
 const props = defineProps({
     columns: { type: Array, required: true },
@@ -43,8 +44,10 @@ const lastPage = computed(() => props.meta?.last_page ?? 1);
                                 {{ row[col.key] ?? '—' }}
                             </slot>
                         </td>
-                        <td v-if="$slots.actions" class="px-4 py-3 text-right">
-                            <slot name="actions" :row="row" />
+                        <td v-if="$slots.actions" class="px-4 py-3">
+                            <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                                <slot name="actions" :row="row" />
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -53,8 +56,8 @@ const lastPage = computed(() => props.meta?.last_page ?? 1);
         <div v-if="lastPage > 1" class="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
             <span>Page {{ currentPage }} of {{ lastPage }}</span>
             <div class="flex gap-2">
-                <button class="rounded-lg px-3 py-1 hover:bg-slate-100 disabled:opacity-40" :disabled="currentPage <= 1" @click="emit('page', currentPage - 1)">Prev</button>
-                <button class="rounded-lg px-3 py-1 hover:bg-slate-100 disabled:opacity-40" :disabled="currentPage >= lastPage" @click="emit('page', currentPage + 1)">Next</button>
+                <AppButton size="sm" variant="secondary" :disabled="currentPage <= 1" @click="emit('page', currentPage - 1)">Prev</AppButton>
+                <AppButton size="sm" variant="secondary" :disabled="currentPage >= lastPage" @click="emit('page', currentPage + 1)">Next</AppButton>
             </div>
         </div>
     </div>

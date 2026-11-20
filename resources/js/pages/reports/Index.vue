@@ -42,7 +42,7 @@ async function download(type, format) {
                 <div class="mt-4 flex gap-2">
                     <AppButton size="sm" @click="download(report.type, 'pdf')">PDF</AppButton>
                     <AppButton size="sm" variant="secondary" @click="download(report.type, 'xlsx')">Excel</AppButton>
-                    <AppButton size="sm" variant="ghost" @click="download(report.type, 'csv')">CSV</AppButton>
+                    <AppButton size="sm" variant="secondary" @click="download(report.type, 'csv')">CSV</AppButton>
                 </div>
             </div>
         </div>

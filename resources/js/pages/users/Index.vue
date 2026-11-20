@@ -28,9 +28,9 @@ const columns = [
     { key: 'roles', label: 'Role' },
 ];
 
-onMounted(async () => {
-    await load();
-    roles.value = await rolesApi.list();
+onMounted(() => {
+    load();
+    rolesApi.list().then((list) => { roles.value = list; });
 });
 
 function openCreate() {

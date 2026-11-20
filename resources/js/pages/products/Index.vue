@@ -27,10 +27,10 @@ const columns = [
     { key: 'category_id', label: 'Category' },
 ];
 
-onMounted(async () => {
-    await load();
-    categories.value = unwrapPaginated(await categoriesApi.list({ per_page: 100 })).data;
-    suppliers.value = unwrapPaginated(await suppliersApi.list({ per_page: 100 })).data;
+onMounted(() => {
+    load();
+    categoriesApi.list({ per_page: 100 }).then((res) => { categories.value = unwrapPaginated(res).data; });
+    suppliersApi.list({ per_page: 100 }).then((res) => { suppliers.value = unwrapPaginated(res).data; });
 });
 
 function openCreate() {

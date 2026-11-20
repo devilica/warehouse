@@ -23,8 +23,8 @@ const shelfForm = ref({ name: '', code: '' });
 const locationForm = ref({ name: '', code: '' });
 
 async function loadWarehouse() {
-    warehouse.value = await warehousesApi.get(route.params.id);
-    await loadZones();
+    const [item] = await Promise.all([warehousesApi.get(route.params.id), loadZones()]);
+    warehouse.value = item;
 }
 
 async function loadZones() {
@@ -90,7 +90,7 @@ onMounted(loadWarehouse);
             </form>
             <DataTable :columns="[{key:'name',label:'Name'},{key:'code',label:'Code'}]" :rows="zones">
                 <template #actions="{ row }">
-                    <AppButton size="sm" @click="loadShelves(row.id)">View Shelves</AppButton>
+                    <AppButton size="sm" variant="secondary" @click="loadShelves(row.id)">View Shelves</AppButton>
                 </template>
             </DataTable>
         </div>
@@ -103,7 +103,7 @@ onMounted(loadWarehouse);
             </form>
             <DataTable :columns="[{key:'name',label:'Name'},{key:'code',label:'Code'}]" :rows="shelves">
                 <template #actions="{ row }">
-                    <AppButton size="sm" @click="loadLocations(row.id)">View Locations</AppButton>
+                    <AppButton size="sm" variant="secondary" @click="loadLocations(row.id)">View Locations</AppButton>
                 </template>
             </DataTable>
         </div>

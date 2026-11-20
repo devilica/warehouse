@@ -1,10 +1,12 @@
 <script setup>
 import { computed } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermission } from '@/composables/usePermission';
+import AppButton from '@/components/ui/AppButton.vue';
 
 const route = useRoute();
+const router = useRouter();
 const auth = useAuthStore();
 const { can, canAny } = usePermission();
 
@@ -69,10 +71,15 @@ function isActive(path) {
     if (path === '/') return route.path === '/';
     return route.path.startsWith(path);
 }
+
+async function logout() {
+    await auth.logout();
+    router.push('/login');
+}
 </script>
 
 <template>
-    <aside class="flex h-full w-64 flex-col bg-slate-900 text-slate-300">
+    <aside class="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-slate-900 text-slate-300">
         <div class="border-b border-slate-800 px-5 py-5">
             <div class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Company WMS</div>
             <div class="mt-1 text-lg font-bold text-white">Warehouse CMS</div>
@@ -92,9 +99,12 @@ function isActive(path) {
                 </RouterLink>
             </div>
         </nav>
-        <div class="border-t border-slate-800 px-4 py-4">
-            <div class="truncate text-sm font-medium text-white">{{ auth.user?.name }}</div>
-            <div class="truncate text-xs text-slate-500">{{ auth.user?.email }}</div>
+        <div class="flex items-center gap-3 border-t border-slate-800 px-4 py-4">
+            <div class="min-w-0 flex-1">
+                <div class="truncate text-sm font-medium text-white">{{ auth.user?.name }}</div>
+                <div class="truncate text-xs text-slate-500">{{ auth.user?.email }}</div>
+            </div>
+            <AppButton variant="danger" size="sm" @click="logout">Logout</AppButton>
         </div>
     </aside>
 </template>

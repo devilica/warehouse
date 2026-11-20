@@ -31,14 +31,17 @@ async function confirm(row) { await goodsReceiptsApi.confirm(row.id); toast.succ
         <DataTable :columns="[{key:'id',label:'#'},{key:'status',label:'Status'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
-                <AppButton v-if="can('goods-receipts.confirm')" size="sm" @click="confirm(row)">Confirm</AppButton>
+                <AppButton v-if="can('goods-receipts.confirm') && row.status !== 'confirmed'" size="sm" @click="confirm(row)">Confirm</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Goods Receipt" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.purchase_order_id" label="Purchase Order ID" required />
                 <FormField v-model="form.warehouse_id" label="Warehouse ID" required />
-                <AppButton type="submit">Create</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit">Create</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

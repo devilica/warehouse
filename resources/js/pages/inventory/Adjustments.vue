@@ -31,14 +31,17 @@ async function approve(row) { await adjustmentsApi.approve(row.id); toast.succes
         <DataTable :columns="[{key:'id',label:'#'},{key:'status',label:'Status'},{key:'reason',label:'Reason'}]" :rows="items" :loading="loading" :meta="meta" @page="goToPage">
             <template #cell-status="{ row }"><Badge>{{ row.status }}</Badge></template>
             <template #actions="{ row }">
-                <AppButton v-if="can('inventory-adjustments.approve')" size="sm" @click="approve(row)">Approve</AppButton>
+                <AppButton v-if="can('inventory-adjustments.approve') && row.status === 'pending'" size="sm" @click="approve(row)">Approve</AppButton>
             </template>
         </DataTable>
         <Modal :open="showModal" title="Create Adjustment" @close="showModal = false">
             <form class="space-y-4" @submit.prevent="create">
                 <FormField v-model="form.warehouse_id" label="Warehouse ID" required />
                 <FormField v-model="form.reason" label="Reason" type="textarea" />
-                <AppButton type="submit">Create</AppButton>
+                <div class="flex justify-end gap-2 pt-2">
+                    <AppButton variant="secondary" @click="showModal = false">Cancel</AppButton>
+                    <AppButton type="submit">Create</AppButton>
+                </div>
             </form>
         </Modal>
     </AdminLayout>

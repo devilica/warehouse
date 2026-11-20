@@ -3,6 +3,7 @@
   "framework": null,
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "public",
+  "regions": ["fra1"],
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.1"
@@ -19,6 +20,7 @@
     "SESSION_DRIVER": "cookie",
     "CACHE_STORE": "array",
     "QUEUE_CONNECTION": "sync",
+    "DB_PERSISTENT": "true",
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
