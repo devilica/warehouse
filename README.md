@@ -4,6 +4,8 @@ Full-stack warehouse management application for inventory, procurement, and staf
 
 **Laravel 12** · **Vue 3** · **PHP 8.2+**
 
+**Preview:** the application is available at [https://warehouse-jrfx.vercel.app/](https://warehouse-jrfx.vercel.app/)
+
 ## Concept
 
 Warehouse CMS is a single-company admin for the people who run a warehouse. Staff use one Vue application. That application talks to one Laravel API, which records stock, purchasing, and who is allowed to do what.
@@ -27,6 +29,7 @@ The seeded demo is meant to look occupied: lists have multiple pages of realisti
 - **Procurement** — purchase orders and goods receipts
 - **People** — users, employees, and roles (Spatie Permission)
 - **System** — PDF, Excel, and CSV reports, an audit log, and notifications
+- **Responsive** — on a phone the menu opens from a button and lists become cards; on a wide screen the sidebar and tables stay in place
 
 ## Getting started
 
@@ -120,7 +123,7 @@ Each pass was reviewed against the running app. Generated code that did not matc
 
 ## Architectural decisions
 
-The UI is a Vue 3 single-page app (Vue Router, Pinia, Tailwind CSS, Vite). It calls `/api/v1` with a Sanctum bearer token stored in the browser.
+The UI is a Vue 3 single-page app (Vue Router, Pinia, Tailwind CSS, Vite). It calls `/api/v1` with a Sanctum bearer token stored in the browser. The layout is responsive: below 1024 px the sidebar is hidden behind a menu button and each table is shown as cards, so the screens fit a phone.
 
 Controllers stay thin. A status change such as sending a purchase order or shipping a transfer is decided in a service, for example [app/Services/PurchaseOrderService.php](app/Services/PurchaseOrderService.php), [app/Services/StockTransferService.php](app/Services/StockTransferService.php), and [app/Services/InventoryService.php](app/Services/InventoryService.php). The service checks the current status and records the stock movement. The screen only shows the button when that same status applies.
 

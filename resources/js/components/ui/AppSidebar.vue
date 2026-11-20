@@ -1,15 +1,22 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { usePermission } from '@/composables/usePermission';
 import AppButton from '@/components/ui/AppButton.vue';
 import NavIcon from '@/components/ui/NavIcon.vue';
 
+const props = defineProps({
+    open: { type: Boolean, default: false },
+});
+const emit = defineEmits(['close']);
+
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const { can } = usePermission();
+
+watch(() => route.fullPath, () => emit('close'));
 
 const navGroups = computed(() => [
     {
@@ -80,7 +87,10 @@ async function logout() {
 </script>
 
 <template>
-    <aside class="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-[#12152c] text-slate-300">
+    <aside
+        class="fixed inset-y-0 left-0 z-40 flex h-screen w-64 shrink-0 flex-col bg-[#12152c] text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:translate-x-0"
+        :class="props.open ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full'"
+    >
         <div class="flex items-center gap-3 px-5 py-5">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-lg shadow-indigo-900/40">
                 <NavIcon name="box" class="h-5 w-5" />
@@ -99,6 +109,7 @@ async function logout() {
                     :to="item.to"
                     class="mb-0.5 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition"
                     :class="isActive(item.to) ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-950/40' : 'text-slate-400 hover:bg-white/5 hover:text-white'"
+                    @click="emit('close')"
                 >
                     <NavIcon :name="item.icon" />
                     <span>{{ item.name }}</span>

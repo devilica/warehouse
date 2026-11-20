@@ -52,7 +52,24 @@ function sortMark(key) {
                 <option v-for="status in statuses" :key="status" :value="status">{{ status.replaceAll('_', ' ') }}</option>
             </select>
         </div>
-        <div class="overflow-x-auto">
+        <div class="space-y-3 p-3 lg:hidden">
+            <p v-if="loading" class="py-10 text-center text-sm text-slate-400">Loading...</p>
+            <p v-else-if="!rows.length" class="py-10 text-center text-sm text-slate-400">No records found</p>
+            <article v-for="row in rows" v-else :key="row.id" class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                <div v-for="col in columns" :key="col.key" class="flex items-start justify-between gap-3 border-b border-slate-100 py-2 last:border-0">
+                    <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{{ col.label }}</span>
+                    <span class="min-w-0 break-words text-right text-sm text-slate-800">
+                        <slot :name="`cell-${col.key}`" :row="row">
+                            {{ row[col.key] ?? '—' }}
+                        </slot>
+                    </span>
+                </div>
+                <div v-if="$slots.actions" class="mt-3 flex flex-wrap justify-end gap-2">
+                    <slot name="actions" :row="row" />
+                </div>
+            </article>
+        </div>
+        <div class="hidden overflow-x-auto lg:block">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50">
                     <tr>
@@ -93,7 +110,7 @@ function sortMark(key) {
                 </tbody>
             </table>
         </div>
-        <div v-if="lastPage > 1" class="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
+        <div v-if="lastPage > 1" class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
             <span>Page {{ currentPage }} of {{ lastPage }} · {{ total }} records</span>
             <div class="flex gap-2">
                 <AppButton size="sm" variant="secondary" :disabled="currentPage <= 1" @click="emit('page', currentPage - 1)">Prev</AppButton>
